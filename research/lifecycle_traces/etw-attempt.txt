@@ -1,0 +1,4 @@
+Tool: logman.exe start <unique name> -ets -p {a669021c-c450-4609-a035-5af59af4df18} 0x58 5 -o <temporary path>
+Provider: Microsoft-Windows-DotNETRuntimeRundown
+Result: Access is denied. Try running this command as an administrator.
+Exit code: -2147024891 (0x80070005)

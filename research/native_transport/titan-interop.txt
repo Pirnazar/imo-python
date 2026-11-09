@@ -1,0 +1,294 @@
+assembly Imo.DataCore.dll
+  ref cppcli_titancpp.MediaProtoX cppcli_titancpp.Titancpp::InitMediaProtoX(cppcli_titancpp.MediaEnvironmentInfoProvider,cppcli_titancpp.MediaSeqParseDelegate,cppcli_titancpp.MediaAuthInfoProvider,cppcli_titancpp.MediaAddressProvider,cppcli_titancpp.MediaEventListener,System.String)
+  ref cppcli_titancpp.Nerv cppcli_titancpp.Titancpp::InitNerv(cppcli_titancpp.NervConfig)
+  ref cppcli_titancpp.NervRequest cppcli_titancpp.NervTask::GetRequest()
+  ref cppcli_titancpp.NervResponse cppcli_titancpp.NervTask::GetResponse()
+  ref cppcli_titancpp.NervTask cppcli_titancpp.Nerv::NewTask(cppcli_titancpp.NervRequest)
+  ref cppcli_titancpp.Titancpp cppcli_titancpp.Titancpp::Init(cppcli_titancpp.Logger,cppcli_titancpp.EnvironmentInfoProvider,cppcli_titancpp.ReportDelegate)
+  ref System.Void cppcli_titancpp.MediaProtoX::AddStateListener(cppcli_titancpp.MediaStateListener)
+  ref System.Void cppcli_titancpp.MediaProtoX::Disconnect()
+  ref System.Void cppcli_titancpp.MediaProtoX::OnForegroundChanged(System.Boolean)
+  ref System.Void cppcli_titancpp.MediaProtoX::OnNetworkChanged(cppcli_titancpp.MediaNetworkType)
+  ref System.Void cppcli_titancpp.MediaProtoX::OnSettingsChanged(System.Collections.Generic.Dictionary`2<System.Int32,System.String>)
+  ref System.Void cppcli_titancpp.MediaProtoX::RegisterPush(System.String,cppcli_titancpp.JSONDelegate)
+  ref System.Void cppcli_titancpp.MediaProtoX::SendJSONWithParams(cppcli_titancpp.JSONRequest,System.String,cppcli_titancpp.JSONDelegate,cppcli_titancpp.SendParams)
+  ref System.Void cppcli_titancpp.MediaProtoX::StartAndKeepConnected()
+  ref System.Void cppcli_titancpp.Nerv::FetchM3u8Url(System.String,cppcli_titancpp.NervM3u8UrlFetchCallback,System.Int64,System.Boolean)
+  ref System.Void cppcli_titancpp.NervTask::Cancel()
+  ref System.Void cppcli_titancpp.NervTask::Start()
+  ref System.Void cppcli_titancpp.Titancpp::Destroy()
+  ref System.Void cppcli_titancpp.Titancpp::OnNetworkChanged(System.Boolean)
+assembly Imo.ChannelNetwork.dll
+  ref cppcli_titancpp.AntibanHttpClient cppcli_titancpp.Antiban::CreateHttpClient(System.Int32,System.Collections.Generic.Dictionary`2<System.String,System.String>,System.String,System.Int32,System.Int32)
+  ref System.Int32 cppcli_titancpp.AntibanHttpClient::Send(System.String,System.Int32,System.Byte[],System.Collections.Generic.Dictionary`2<System.String,System.String>,cppcli_titancpp.AntibanHttpCallback)
+  ref System.String cppcli_titancpp.AntibanHttpClient::Info(System.String)
+  ref System.Void cppcli_titancpp.AntibanHttpClient::Close()
+assembly libtitancpp.dll architecture=I386 flags=16
+type cppcli_titancpp.AntibanHttpClient
+  api System.Int32 cppcli_titancpp.AntibanHttpClient::Send(System.String,System.Int32,System.Byte[],System.Collections.Generic.Dictionary`2<System.String,System.String>,cppcli_titancpp.AntibanHttpCallback)
+  api System.Void cppcli_titancpp.AntibanHttpClient::Close()
+  api System.String cppcli_titancpp.AntibanHttpClient::Info(System.String)
+  api System.Void cppcli_titancpp.AntibanHttpClient::Cancel(System.Int32)
+type cppcli_titancpp.Antiban
+  api cppcli_titancpp.AntibanHttpClient cppcli_titancpp.Antiban::CreateHttpClient(System.Int32,System.Collections.Generic.Dictionary`2<System.String,System.String>,System.String,System.Int32,System.Int32)
+type cppcli_titancpp.JSONDelegate
+  api System.Int32 cppcli_titancpp.JSONDelegate::OnResponse(cppcli_titancpp.JSONResponse)
+  api System.Void cppcli_titancpp.JSONDelegate::OnError(System.Int32)
+type cppcli_titancpp.MediaAuthInfoProvider
+  api System.String cppcli_titancpp.MediaAuthInfoProvider::GetUid()
+  api System.String cppcli_titancpp.MediaAuthInfoProvider::GetSSID()
+type cppcli_titancpp.MediaEventListener
+  api System.Void cppcli_titancpp.MediaEventListener::OnAddrRequestFail(System.Int32)
+  api System.Void cppcli_titancpp.MediaEventListener::OnLoginFail(System.Int32)
+type cppcli_titancpp.MediaStateListener
+  api System.Void cppcli_titancpp.MediaStateListener::OnStateChange(System.Boolean,System.Int32)
+type cppcli_titancpp.MediaProtoX
+  api System.Void cppcli_titancpp.MediaProtoX::SendJSONWithParams(cppcli_titancpp.JSONRequest,System.String,cppcli_titancpp.JSONDelegate,cppcli_titancpp.SendParams)
+  api System.Void cppcli_titancpp.MediaProtoX::CancelJSONRequest(System.String,System.Int64)
+  api System.Void cppcli_titancpp.MediaProtoX::RegisterPush(System.String,cppcli_titancpp.JSONDelegate)
+  api System.Void cppcli_titancpp.MediaProtoX::StartAndKeepConnected()
+  api System.Void cppcli_titancpp.MediaProtoX::Disconnect()
+  api System.Int32 cppcli_titancpp.MediaProtoX::GetState()
+  api System.Void cppcli_titancpp.MediaProtoX::AddStateListener(cppcli_titancpp.MediaStateListener)
+  api System.Void cppcli_titancpp.MediaProtoX::OnForegroundChanged(System.Boolean)
+  api System.Void cppcli_titancpp.MediaProtoX::OnNetworkChanged(cppcli_titancpp.MediaNetworkType)
+  api System.Void cppcli_titancpp.MediaProtoX::OnSettingsChanged(System.Collections.Generic.Dictionary`2<System.Int32,System.String>)
+type cppcli_titancpp.NervTask
+  api System.Void cppcli_titancpp.NervTask::Start()
+  api System.Void cppcli_titancpp.NervTask::Pause()
+  api System.Void cppcli_titancpp.NervTask::Cancel()
+  api System.Void cppcli_titancpp.NervTask::Remove()
+  api System.Void cppcli_titancpp.NervTask::PauseAll()
+  api System.Void cppcli_titancpp.NervTask::CancelAll()
+  api cppcli_titancpp.NervTaskState cppcli_titancpp.NervTask::GetState()
+  api cppcli_titancpp.NervRequest cppcli_titancpp.NervTask::GetRequest()
+  api cppcli_titancpp.NervResponse cppcli_titancpp.NervTask::GetResponse()
+type cppcli_titancpp.Nerv
+  api cppcli_titancpp.NervTask cppcli_titancpp.Nerv::NewTask(cppcli_titancpp.NervRequest)
+  api System.Void cppcli_titancpp.Nerv::FetchM3u8Url(System.String,cppcli_titancpp.NervM3u8UrlFetchCallback,System.Int64,System.Boolean)
+type cppcli_titancpp.Titancpp
+  api cppcli_titancpp.Titancpp cppcli_titancpp.Titancpp::Init(cppcli_titancpp.Logger,cppcli_titancpp.EnvironmentInfoProvider,cppcli_titancpp.ReportDelegate)
+  api cppcli_titancpp.Nerv cppcli_titancpp.Titancpp::InitNerv(cppcli_titancpp.NervConfig)
+  api cppcli_titancpp.Nerv cppcli_titancpp.Titancpp::Nerv()
+  api cppcli_titancpp.MediaProtoX cppcli_titancpp.Titancpp::InitMediaProtoX(cppcli_titancpp.MediaEnvironmentInfoProvider,cppcli_titancpp.MediaSeqParseDelegate,cppcli_titancpp.MediaAuthInfoProvider,cppcli_titancpp.MediaAddressProvider,cppcli_titancpp.MediaEventListener,System.String)
+  api cppcli_titancpp.MediaProtoX cppcli_titancpp.Titancpp::MediaProtoX()
+  api cppcli_titancpp.Antiban cppcli_titancpp.Titancpp::Antiban()
+  api System.Void cppcli_titancpp.Titancpp::OnNetworkChanged(System.Boolean)
+  api System.Void cppcli_titancpp.Titancpp::Destroy()
+  methoddef 0x060009f3 rva=0x81b28 titancpp.MediaProtoXImpl.{ctor}
+  methoddef 0x060009fb rva=0x856e8 titancpp.MediaProtoXImpl.__vecDelDtor
+  methoddef 0x060009fc rva=0x85774 titancpp.MediaProtoXImpl.{dtor}
+  methoddef 0x060015c3 rva=0xbe13c titancpp.MediaProtoXImpl.init
+  methoddef 0x060015c4 rva=0xbe5fc titancpp.MediaProtoXImpl.sendJSONWithParams
+  methoddef 0x060015c6 rva=0xbc8b4 titancpp.MediaProtoXImpl.cancelJSONRequest
+  methoddef 0x060015c7 rva=0xbe90c titancpp.MediaProtoXImpl.registerPush
+  methoddef 0x060015c8 rva=0xbc8e0 titancpp.MediaProtoXImpl.startAndKeepConnected
+  methoddef 0x060015c9 rva=0xbc90c titancpp.MediaProtoXImpl.disconnect
+  methoddef 0x060015ca rva=0xbc938 titancpp.MediaProtoXImpl.getState
+  methoddef 0x060015cb rva=0xbe9e8 titancpp.MediaProtoXImpl.addStateListener
+  methoddef 0x060015cc rva=0xbc968 titancpp.MediaProtoXImpl.onForegroundChanged
+  methoddef 0x060015cd rva=0xbc994 titancpp.MediaProtoXImpl.onNetworkChanged
+  methoddef 0x060015ce rva=0xbc9f8 titancpp.MediaProtoXImpl.onSettingsChanged
+  methoddef 0x060015cf rva=0xbd938 titancpp.MediaProtoXImpl.destroy
+method 0x832e0 IL <Module>::titancpp.TitancppImpl.initNerv
+  il_0004 call std.make_shared<class titancpp::NervImpl>
+  il_0037 call titancpp.NervImpl.init
+  il_00d9 call Increment
+method 0x834a0 IL <Module>::titancpp.TitancppImpl.initMediaProtoX
+  il_0004 call std.make_shared<class titancpp::MediaProtoXImpl>
+  il_0022 call Increment
+  il_004b call titancpp.MediaProtoXImpl.init
+  il_00ca call Increment
+method 0x83e88 IL <Module>::bp_titancpp.Titancpp.init
+  il_000c call basex.Logger.getInstance
+  il_0014 calli System.Int32 modopt(System.Runtime.CompilerServices.CallConvThiscall)(System.IntPtr)
+  il_0019 call basex.Logger.setLogLevel
+  il_0021 call std.make_shared<class titancpp::LoggerImpl,class std::shared_ptr<class bp_titancpp::Logger> const &>
+  il_0031 call basex.Logger.getInstance
+  il_0038 call basex.Logger.setLogger
+  il_005e call basex.Logger.getInstance
+  il_0064 call basex.Logger.isLoggable
+  il_0080 calli System.Int32 modopt(System.Runtime.CompilerServices.CallConvThiscall)(System.IntPtr)
+  il_0085 call basex.string_format<>
+  il_00a9 call basex.Logger.getInstance
+  il_00b1 call basex.Logger.LogD
+  il_0131 call std.make_shared<class titancpp::ReportDelegateImpl,class std::shared_ptr<class bp_titancpp::ReportDelegate> const &>
+  il_013e call std.make_shared<class titancpp::TitancppImpl,class std::shared_ptr<class bp_titancpp::EnvironmentInfoProvider> const &,class std::shared_ptr<class titancpp::ReportDelegateImpl> &,class std::shared_ptr<class titancpp::LoggerImpl> &>
+  il_0147 call titancpp.TitancppImpl.init
+method 0x8739c IL <Module>::bp_titancpp.AntibanHttpClientImpl.{ctor}
+  il_0018 call bp_proxy.Proxy.createHttpClient
+method 0x87f34 IL <Module>::bp_titancpp.AntibanHttpClientImpl.send
+  il_001b call bigo.Buffer.{ctor}
+  il_0025 call std.make_shared<class bp_titancpp::AntibanHttpCallbackWrapper,class std::shared_ptr<class bp_titancpp::AntibanHttpCallback> const &>
+  il_005e calli System.Int32 modopt(System.Runtime.CompilerServices.CallConvThiscall)(System.IntPtr,std.basic_string<char,std::char_traits<char>,std::allocator<char> > modopt(System.Runtime.CompilerServices.IsConst)* modopt(System.Runtime.CompilerServices.IsImplicitlyDereferenced),System.Int32,bigo.Buffer modopt(System.Runtime.CompilerServices.IsConst)* modopt(System.Runtime.CompilerServices.IsImplicitlyDereferenced),std.unordered_map<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,std::basic_string<char,std::char_traits<char>,std::allocator<char> >,std::hash<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >,std::equal_to<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >,std::allocator<std::pair<std::basic_string<char,std::char_traits<char>,std::allocator<char> > const ,std::basic_string<char,std::char_traits<char>,std::allocator<char> > > > > modopt(System.Runtime.CompilerServices.IsConst)* modopt(System.Runtime.CompilerServices.IsImplicitlyDereferenced),std.shared_ptr<bp_proxy::HttpCallback> modopt(System.Runtime.CompilerServices.IsConst)* modopt(System.Runtime.CompilerServices.IsImplicitlyDereferenced))
+  il_00bc call bigo.Buffer.{dtor}
+method 0x87754 IL <Module>::bp_titancpp.Antiban.createHttpClient
+  il_000c call std.make_shared<class bp_titancpp::AntibanHttpClientImpl,int &,class std::unordered_map<class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >,class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >,struct std::hash<class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > >,struct std::equal_to<class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > >,class std::allocator<struct std::pair<class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > const ,class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > > > > const &,class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > const &,int &,int &>
+method 0xbe13c IL <Module>::titancpp.MediaProtoXImpl.init
+  il_0006 call std.make_shared<class titancpp::ProtoXStatManager,class std::shared_ptr<class bp_titancpp::ReportDelegate> const &>
+  il_0039 call bigo_protox_djinni.YYProtoX.globalInitialize
+  il_00cc call std.make_shared<class titancpp::MediaAddressProviderWrapper,class std::shared_ptr<class bp_titancpp::MediaAddressProvider> const &>
+  il_00d6 call std.make_shared<class titancpp::MediaAuthInfoProviderWrapper,class std::shared_ptr<class bp_titancpp::MediaAuthInfoProvider> const &>
+  il_00df call std.make_shared<class titancpp::MediaEnvironmentInfoProviderWrapper,class std::shared_ptr<class bp_titancpp::MediaEnvironmentInfoProvider> const &>
+  il_00e9 call std.make_shared<class titancpp::MediaEventListenerWrapper,class std::shared_ptr<class bp_titancpp::MediaEventListener> const &>
+  il_00f2 call std.make_shared<class titancpp::MediaSeqParseDelegateWrapper,class std::shared_ptr<class bp_titancpp::MediaSeqParseDelegate> const &>
+  il_0172 call bigo_protox_djinni.MediaProtoX.newMediaInstance
+method 0xbe5fc IL <Module>::titancpp.MediaProtoXImpl.sendJSONWithParams
+  il_0014 call std.make_shared<class titancpp::MediaSendParamsWrapper,class std::shared_ptr<class bp_titancpp::SendParams> const &>
+  il_003d call std.make_shared<class titancpp::MediaJSONDelegateWrapper,class std::shared_ptr<class bp_titancpp::JSONDelegate> const &>
+  il_0105 calli System.Void modopt(System.Runtime.CompilerServices.CallConvThiscall)(System.IntPtr,bigo_protox_djinni.JSONRequest modopt(System.Runtime.CompilerServices.IsConst)* modopt(System.Runtime.CompilerServices.IsImplicitlyDereferenced),std.basic_string<char,std::char_traits<char>,std::allocator<char> > modopt(System.Runtime.CompilerServices.IsConst)* modopt(System.Runtime.CompilerServices.IsImplicitlyDereferenced),std.shared_ptr<bigo_protox_djinni::JSONDelegate> modopt(System.Runtime.CompilerServices.IsConst)* modopt(System.Runtime.CompilerServices.IsImplicitlyDereferenced),std.shared_ptr<bigo_protox_djinni::SendParams> modopt(System.Runtime.CompilerServices.IsConst)* modopt(System.Runtime.CompilerServices.IsImplicitlyDereferenced))
+method 0xbe90c IL <Module>::titancpp.MediaProtoXImpl.registerPush
+  il_0013 call std.make_shared<class titancpp::MediaJSONDelegateWrapper,class std::shared_ptr<class bp_titancpp::JSONDelegate> const &>
+  il_0048 calli System.Void modopt(System.Runtime.CompilerServices.CallConvThiscall)(System.IntPtr,std.basic_string<char,std::char_traits<char>,std::allocator<char> > modopt(System.Runtime.CompilerServices.IsConst)* modopt(System.Runtime.CompilerServices.IsImplicitlyDereferenced),std.shared_ptr<bigo_protox_djinni::JSONDelegate> modopt(System.Runtime.CompilerServices.IsConst)* modopt(System.Runtime.CompilerServices.IsImplicitlyDereferenced))
+method 0xbc8e0 IL <Module>::titancpp.MediaProtoXImpl.startAndKeepConnected
+  il_0013 calli System.Void modopt(System.Runtime.CompilerServices.CallConvThiscall)(System.IntPtr)
+method 0xbc938 IL <Module>::titancpp.MediaProtoXImpl.getState
+  il_0015 calli System.Int32 modopt(System.Runtime.CompilerServices.CallConvThiscall)(System.IntPtr)
+method 0x5d9a05 Native, Unmanaged, PreserveSig <Module>::bp_proxy.Proxy.createHttpClient
+method 0x5d9a0b Native, Unmanaged, PreserveSig <Module>::bp_proxy.Proxy.init
+method 0x3c5170 Native, Unmanaged, PreserveSig <Module>::bigo_protox_djinni.YYProtoX.globalInitialize
+method 0x5cc40 IL cppcli_titancpp.AntibanHttpClientCppProxy::Send
+  il_0003 call __CxxQueryExceptionSize
+  il_000f call ToCpp
+  il_001a call djinni.Map<djinni::String,djinni::String>.ToCpp
+  il_0024 call djinni.Binary.ToCpp
+  il_002e call djinni.String.ToCpp
+  il_003b call op_MemberSelection
+  il_0059 calli System.Int32 modopt(System.Runtime.CompilerServices.CallConvThiscall)(System.IntPtr,std.basic_string<char,std::char_traits<char>,std::allocator<char> > modopt(System.Runtime.CompilerServices.IsConst)* modopt(System.Runtime.CompilerServices.IsImplicitlyDereferenced),System.Int32,std.vector<unsigned char,std::allocator<unsigned char> > modopt(System.Runtime.CompilerServices.IsConst)* modopt(System.Runtime.CompilerServices.IsImplicitlyDereferenced),std.unordered_map<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,std::basic_string<char,std::char_traits<char>,std::allocator<char> >,std::hash<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >,std::equal_to<std::basic_string<char,std::char_traits<char>,std::allocator<char> > >,std::allocator<std::pair<std::basic_string<char,std::char_traits<char>,std::allocator<char> > const ,std::basic_string<char,std::char_traits<char>,std::allocator<char> > > > > modopt(System.Runtime.CompilerServices.IsConst)* modopt(System.Runtime.CompilerServices.IsImplicitlyDereferenced),std.shared_ptr<bp_titancpp::AntibanHttpCallback> modopt(System.Runtime.CompilerServices.IsConst)* modopt(System.Runtime.CompilerServices.IsImplicitlyDereferenced))
+  il_00fc call KeepAlive
+  il_0107 call GetExceptionPointers
+  il_0114 call __CxxExceptionFilter
+  il_011e call GetExceptionPointers
+  il_0124 call __CxxRegisterExceptionObject
+  il_012f call djinni.ThrowNativeExceptionFromCurrent
+  il_0137 call GetExceptionPointers
+  il_013c call __CxxDetectRethrow
+  il_0151 call __CxxUnregisterExceptionObject
+  il_015a call KeepAlive
+method 0x68cc8 IL cppcli_titancpp.MediaProtoXCppProxy::SendJSONWithParams
+  il_0000 call __CxxQueryExceptionSize
+  il_000c call ToCpp
+  il_0016 call ToCpp
+  il_0020 call djinni.String.ToCpp
+  il_002a call ToCpp
+  il_0036 call op_MemberSelection
+  il_004f calli System.Void modopt(System.Runtime.CompilerServices.CallConvThiscall)(System.IntPtr,bp_titancpp.JSONRequest modopt(System.Runtime.CompilerServices.IsConst)* modopt(System.Runtime.CompilerServices.IsImplicitlyDereferenced),std.basic_string<char,std::char_traits<char>,std::allocator<char> > modopt(System.Runtime.CompilerServices.IsConst)* modopt(System.Runtime.CompilerServices.IsImplicitlyDereferenced),std.shared_ptr<bp_titancpp::JSONDelegate> modopt(System.Runtime.CompilerServices.IsConst)* modopt(System.Runtime.CompilerServices.IsImplicitlyDereferenced),std.shared_ptr<bp_titancpp::SendParams> modopt(System.Runtime.CompilerServices.IsConst)* modopt(System.Runtime.CompilerServices.IsImplicitlyDereferenced))
+  il_0106 call GetExceptionPointers
+  il_0113 call __CxxExceptionFilter
+  il_011d call GetExceptionPointers
+  il_0123 call __CxxRegisterExceptionObject
+  il_012e call djinni.ThrowNativeExceptionFromCurrent
+  il_0136 call GetExceptionPointers
+  il_013b call __CxxDetectRethrow
+  il_0150 call __CxxUnregisterExceptionObject
+  il_0159 call KeepAlive
+method 0x68f28 IL cppcli_titancpp.MediaProtoXCppProxy::CancelJSONRequest
+  il_0000 call __CxxQueryExceptionSize
+  il_000b call djinni.String.ToCpp
+  il_0017 call op_MemberSelection
+  il_002e calli System.Void modopt(System.Runtime.CompilerServices.CallConvThiscall)(System.IntPtr,std.basic_string<char,std::char_traits<char>,std::allocator<char> > modopt(System.Runtime.CompilerServices.IsConst)* modopt(System.Runtime.CompilerServices.IsImplicitlyDereferenced),System.Int64)
+  il_005e call GetExceptionPointers
+  il_006b call __CxxExceptionFilter
+  il_0075 call GetExceptionPointers
+  il_007b call __CxxRegisterExceptionObject
+  il_0086 call djinni.ThrowNativeExceptionFromCurrent
+  il_008e call GetExceptionPointers
+  il_0093 call __CxxDetectRethrow
+  il_00a8 call __CxxUnregisterExceptionObject
+  il_00b1 call KeepAlive
+method 0x69068 IL cppcli_titancpp.MediaProtoXCppProxy::RegisterPush
+  il_0000 call __CxxQueryExceptionSize
+  il_000b call ToCpp
+  il_0015 call djinni.String.ToCpp
+  il_0021 call op_MemberSelection
+  il_0037 calli System.Void modopt(System.Runtime.CompilerServices.CallConvThiscall)(System.IntPtr,std.basic_string<char,std::char_traits<char>,std::allocator<char> > modopt(System.Runtime.CompilerServices.IsConst)* modopt(System.Runtime.CompilerServices.IsImplicitlyDereferenced),std.shared_ptr<bp_titancpp::JSONDelegate> modopt(System.Runtime.CompilerServices.IsConst)* modopt(System.Runtime.CompilerServices.IsImplicitlyDereferenced))
+  il_0088 call GetExceptionPointers
+  il_0095 call __CxxExceptionFilter
+  il_009f call GetExceptionPointers
+  il_00a5 call __CxxRegisterExceptionObject
+  il_00b0 call djinni.ThrowNativeExceptionFromCurrent
+  il_00b8 call GetExceptionPointers
+  il_00bd call __CxxDetectRethrow
+  il_00d2 call __CxxUnregisterExceptionObject
+  il_00db call KeepAlive
+method 0x679d4 IL cppcli_titancpp.MediaProtoXCppProxy::StartAndKeepConnected
+  il_0000 call __CxxQueryExceptionSize
+  il_000e call op_MemberSelection
+  il_0020 calli System.Void modopt(System.Runtime.CompilerServices.CallConvThiscall)(System.IntPtr)
+  il_0028 call GetExceptionPointers
+  il_0035 call __CxxExceptionFilter
+  il_003f call GetExceptionPointers
+  il_0045 call __CxxRegisterExceptionObject
+  il_0050 call djinni.ThrowNativeExceptionFromCurrent
+  il_0058 call GetExceptionPointers
+  il_005d call __CxxDetectRethrow
+  il_0072 call __CxxUnregisterExceptionObject
+  il_007b call KeepAlive
+method 0x67b8c IL cppcli_titancpp.MediaProtoXCppProxy::GetState
+  il_0000 call __CxxQueryExceptionSize
+  il_000e call op_MemberSelection
+  il_0021 calli System.Int32 modopt(System.Runtime.CompilerServices.CallConvThiscall)(System.IntPtr)
+  il_002e call KeepAlive
+  il_0039 call GetExceptionPointers
+  il_0046 call __CxxExceptionFilter
+  il_0050 call GetExceptionPointers
+  il_0056 call __CxxRegisterExceptionObject
+  il_0061 call djinni.ThrowNativeExceptionFromCurrent
+  il_0069 call GetExceptionPointers
+  il_006e call __CxxDetectRethrow
+  il_0083 call __CxxUnregisterExceptionObject
+  il_008c call KeepAlive
+method 0x6d060 IL cppcli_titancpp.NervCppProxy::NewTask
+  il_0000 call __CxxQueryExceptionSize
+  il_000b call ToCpp
+  il_0018 call op_MemberSelection
+  il_002e calli std.shared_ptr<bp_titancpp::NervTask>* modreq(System.Runtime.CompilerServices.IsUdtReturn) modopt(System.Runtime.CompilerServices.CallConvThiscall)(System.IntPtr,std.shared_ptr<bp_titancpp::NervTask>*,std.shared_ptr<bp_titancpp::NervRequest> modopt(System.Runtime.CompilerServices.IsConst)* modopt(System.Runtime.CompilerServices.IsImplicitlyDereferenced))
+  il_0058 call FromCpp
+  il_0083 call KeepAlive
+  il_008e call GetExceptionPointers
+  il_009b call __CxxExceptionFilter
+  il_00a5 call GetExceptionPointers
+  il_00ab call __CxxRegisterExceptionObject
+  il_00b6 call djinni.ThrowNativeExceptionFromCurrent
+  il_00be call GetExceptionPointers
+  il_00c3 call __CxxDetectRethrow
+  il_00d8 call __CxxUnregisterExceptionObject
+  il_00e1 call KeepAlive
+method 0x7e604 IL cppcli_titancpp.TitancppCppProxy::InitNerv
+  il_0000 call __CxxQueryExceptionSize
+  il_000b call ToCpp
+  il_0018 call op_MemberSelection
+  il_002e calli std.shared_ptr<bp_titancpp::Nerv>* modreq(System.Runtime.CompilerServices.IsUdtReturn) modopt(System.Runtime.CompilerServices.CallConvThiscall)(System.IntPtr,std.shared_ptr<bp_titancpp::Nerv>*,bp_titancpp.NervConfig modopt(System.Runtime.CompilerServices.IsConst)* modopt(System.Runtime.CompilerServices.IsImplicitlyDereferenced))
+  il_004a call bp_titancpp.NervLbsConfig.{dtor}
+  il_0082 call FromCpp
+  il_00ad call KeepAlive
+  il_00b8 call GetExceptionPointers
+  il_00c5 call __CxxExceptionFilter
+  il_00cf call GetExceptionPointers
+  il_00d5 call __CxxRegisterExceptionObject
+  il_00e0 call djinni.ThrowNativeExceptionFromCurrent
+  il_00e8 call GetExceptionPointers
+  il_00ed call __CxxDetectRethrow
+  il_0102 call __CxxUnregisterExceptionObject
+  il_010b call KeepAlive
+method 0x7df6c IL cppcli_titancpp.TitancppCppProxy::InitMediaProtoX
+  il_0000 call __CxxQueryExceptionSize
+  il_000c call djinni.String.ToCpp
+  il_0017 call ToCpp
+  il_0022 call ToCpp
+  il_002c call ToCpp
+  il_0036 call ToCpp
+  il_0040 call ToCpp
+  il_004d call op_MemberSelection
+  il_006e calli std.shared_ptr<bp_titancpp::MediaProtoX>* modreq(System.Runtime.CompilerServices.IsUdtReturn) modopt(System.Runtime.CompilerServices.CallConvThiscall)(System.IntPtr,std.shared_ptr<bp_titancpp::MediaProtoX>*,std.shared_ptr<bp_titancpp::MediaEnvironmentInfoProvider> modopt(System.Runtime.CompilerServices.IsConst)* modopt(System.Runtime.CompilerServices.IsImplicitlyDereferenced),std.shared_ptr<bp_titancpp::MediaSeqParseDelegate> modopt(System.Runtime.CompilerServices.IsConst)* modopt(System.Runtime.CompilerServices.IsImplicitlyDereferenced),std.shared_ptr<bp_titancpp::MediaAuthInfoProvider> modopt(System.Runtime.CompilerServices.IsConst)* modopt(System.Runtime.CompilerServices.IsImplicitlyDereferenced),std.shared_ptr<bp_titancpp::MediaAddressProvider> modopt(System.Runtime.CompilerServices.IsConst)* modopt(System.Runtime.CompilerServices.IsImplicitlyDereferenced),std.shared_ptr<bp_titancpp::MediaEventListener> modopt(System.Runtime.CompilerServices.IsConst)* modopt(System.Runtime.CompilerServices.IsImplicitlyDereferenced),std.basic_string<char,std::char_traits<char>,std::allocator<char> > modopt(System.Runtime.CompilerServices.IsConst)* modopt(System.Runtime.CompilerServices.IsImplicitlyDereferenced))
+  il_0198 call FromCpp
+  il_01c3 call KeepAlive
+  il_01ce call GetExceptionPointers
+  il_01db call __CxxExceptionFilter
+  il_01e5 call GetExceptionPointers
+  il_01eb call __CxxRegisterExceptionObject
+  il_01f6 call djinni.ThrowNativeExceptionFromCurrent
+  il_01fe call GetExceptionPointers
+  il_0203 call __CxxDetectRethrow
+  il_0218 call __CxxUnregisterExceptionObject
+  il_0221 call KeepAlive

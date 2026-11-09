@@ -1,0 +1,17 @@
+{
+  "captured_at_utc": "2026-11-09T19:30:26.7482801Z",
+  "pid": 43864,
+  "file_version": "1.5.9.3",
+  "native_modules": [
+    "clr.dll",
+    "ImoDesktopApp.exe",
+    "libtitancpp.dll",
+    "MSCOREE.DLL",
+    "mscoreei.dll",
+    "proxy.dll",
+    "SQLite.Interop.dll"
+  ],
+  "tcp_listeners": 1,
+  "tcp_loopback_listeners": 1,
+  "tcp_established": 1
+}

@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "imo-python"
+version = "0.3.0"
+description = "Python client for IMO Web with QR login, chat history, and attachment downloads."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [{ name = "imo-python" }]
+keywords = ["imo", "reverse-engineering", "data-models", "imdata"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Libraries",
+    "Operating System :: Microsoft :: Windows",
+]
+dependencies = ["websocket-client>=1.8,<2"]
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+qr = ["qrcode>=7.4,<9"]
+
+[tool.setuptools]
+package-dir = { "" = "python" }
+
+[tool.setuptools.packages.find]
+where = ["python"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

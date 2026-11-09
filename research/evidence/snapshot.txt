@@ -1,0 +1,62 @@
+=== .NET Framework x86 standalone ===
+process=x86 clr=4.0.30319.42000 pid=9876
+loaded ImoDesktopApp.exe version=1.5.9.3
+loaded Imo.Dispatcher.dll version=1.0.0.0
+loaded Imo.DataModel.dll version=1.0.0.0
+loaded Imo.DataCommon.dll version=1.0.0.0
+loaded Imo.ChannelNetwork.dll version=1.0.0.0
+loaded Imo.DataCore.dll version=1.0.0.0
+loaded Imo.DB.dll version=1.0.0.0
+loaded Plugs\Imo.Contact.dll version=1.0.0.0
+loaded Plugs\Imo.Message.dll version=1.0.0.0
+models: synthetic TextMessage, MessageModel, ChaterModel, UserModel
+method public Imo.DataCore.Market::Boolean Initialize() IL=invalid-on-disk
+method public Imo.DataCore.Market::Void InitConnect() IL=invalid-on-disk
+method public Imo.DataCore.Market::System.Object RunTask(Imo.DataModel.Enums.ActionTypes, Imo.DataModel.Structs.ActionParamer) IL=invalid-on-disk
+method public Imo.DataCore.Market::Imo.DataCore.Market get_Instance() IL=invalid-on-disk
+method public Imo.DataCore.Market::System.String get_SSID() IL=invalid-on-disk
+method public Imo.DataCore.Market::Void add_ReceivedData(Imo.DataCore.ReceivedDataHandler) IL=invalid-on-disk
+method public Imo.DataCore.Market::Void add_ReceivedDevData(Imo.DataCore.ReceivedDevDataHandler) IL=invalid-on-disk
+method public Imo.ChannelNetwork.NetMarket::Void InitConnect() IL=invalid-on-disk
+method public Imo.ChannelNetwork.NetMarket::Void Reconnect(Boolean, System.String, Boolean, Boolean) IL=invalid-on-disk
+method public Imo.ChannelNetwork.NetMarket::Void add_ReceiveMessageHandler(System.Action`1[Newtonsoft.Json.Linq.JObject]) IL=invalid-on-disk
+method public Imo.DataCore.Message.DevMessageManager::System.Collections.Generic.IEnumerable`1[Imo.CommonHelper.Collections.TimestampedObject`1[Newtonsoft.Json.Linq.JObject]] GetReceivedMessages() IL=invalid-on-disk
+method public Imo.DataCore.Message.DevMessageManager::System.Collections.Generic.IEnumerable`1[Imo.CommonHelper.Collections.TimestampedObject`1[Newtonsoft.Json.Linq.JObject]] GetSentMessages() IL=invalid-on-disk
+method public Imo.DataCore.Message.DevMessageManager::System.Collections.Generic.IEnumerable`1[Imo.CommonHelper.Collections.TimestampedObject`1[Newtonsoft.Json.Linq.JObject]] GetProcessedMessages() IL=invalid-on-disk
+method nonpublic Imo.DataCore.Message.MessageManager::Void HandleRecvIm(Newtonsoft.Json.Linq.JObject) IL=invalid-on-disk
+method nonpublic Imo.DataCore.Message.MessageManager::Void HandleRecvUnreadMsgs(Newtonsoft.Json.Linq.JObject) IL=invalid-on-disk
+dispatcher callback: other instance=0, local synthetic dispatch=1
+=== Activation mapping ===
+process=x86 clr=4.0.30319.42000 pid=35780
+activation_port=10598
+=== PID ownership and COM registration ===
+{
+  "pid": 43864,
+  "activation_listener_matched": true,
+  "tcp_listener_count": 1,
+  "other_tcp_listener_count": 0,
+  "matching_registered_com_classes": 0
+}
+=== Local SQLite schema and counts ===
+{
+  "root": "roaming",
+  "candidates": 1,
+  "databases": [
+    {
+      "journal_mode": "rollback",
+      "table_count": 1,
+      "rows": {
+        "T_Chater": 0,
+        "T_Message": null,
+        "T_User": null
+      }
+    }
+  ]
+}
+{
+  "root": "documents",
+  "candidates": 0,
+  "databases": []
+}
+=== Handle classification (partial snapshot) ===
+{'duplicate_unavailable': 368, 'socket': 9}
