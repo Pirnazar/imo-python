@@ -6,10 +6,10 @@ import os
 
 import pytest
 
-from imo.legacy import IMOAttachmentTooLarge, IMOAttachmentUnavailable, IMOClient, IMODownloadError, IMOLoginError
-from imo.legacy import extract_attachments
-from imo.legacy import _media, _nerv
-from imo.legacy._media_identity import account_hash
+from imo import IMOAttachmentTooLarge, IMOAttachmentUnavailable, IMOClient, IMODownloadError, IMOLoginError
+from imo import extract_attachments
+from imo import _media, _nerv
+from imo._media_identity import account_hash
 
 
 # Synthetic values serialized by the public IMO Web bundle's encoder.

@@ -1,8 +1,8 @@
-# Синхронный клиент IMO Web
+# Клиент IMO Web
 
 [English](web_client.en.md) · [Русский](web_client.md) · [Türkmençe](web_client.tk.md)
 
-`imo.legacy.IMOClient` — синхронный клиент на основе анализа протокола IMO Web в пакете `imo-python 0.6.0`. Он открывает отдельную сессию, которую вы подтверждаете в официальном мобильном приложении IMO. Для работы нужен Python 3.11 или новее. Сессия хранится в памяти. Используйте каждый экземпляр клиента из одного потока. [Асинхронный SDK](api.ru.md) · [Официальный IMO Web](https://web.imo.im/) · [Справка IMO о QR-входе](https://imo.im/faq/More-Ways-to-Login)
+`imo.IMOClient` — синхронный клиент на основе анализа протокола IMO Web в пакете `imo-python 0.7.0`. Он открывает отдельную сессию, которую вы подтверждаете в официальном мобильном приложении IMO. Для работы нужен Python 3.11 или новее. Сессия хранится в памяти. Используйте каждый экземпляр клиента из одного потока. [Официальный IMO Web](https://web.imo.im/) · [Справка IMO о QR-входе](https://imo.im/faq/More-Ways-to-Login)
 
 ## Установка и вход по QR-коду
 
@@ -16,7 +16,7 @@ python examples/web_qr.py --download-dir imo-downloads
 Отсканируйте QR-код телефоном и подтвердите вход в IMO. В примере команда `chats` показывает идентификаторы бесед, `history BUID` читает последнюю страницу истории, `download BUID 20` сохраняет вложения из 20 последних сообщений, а `members BUID` выводит участников группы. `BUID` — идентификатор беседы, который возвращает IMO.
 
 ```python
-from imo.legacy import IMOClient
+from imo import IMOClient
 
 with IMOClient(region="sgp", timeout=15) as client:
     client.connect()
@@ -49,7 +49,7 @@ with IMOClient(region="sgp", timeout=15) as client:
 Поддерживаются оригиналы документов, фото, видео, аудио и голосовых сообщений, а также GIF, которые IMO хранит как скачиваемые медиа. Клиент выбирает Nerv, Pixel или HTTPS-ссылку хранилища IMO по метаданным вложения. Данные записываются во временный файл по мере получения. Клиент удаляет незавершённые загрузки и добавляет числовой суффикс при совпадении имён. Лимит по умолчанию — 256 МиБ на вложение. Для недоступных или истёкших файлов возникает `IMOAttachmentUnavailable`, для превышения лимита — `IMOAttachmentTooLarge`. Остальные ошибки загрузки возвращаются как `IMODownloadError`, ошибки сигнального соединения — как `IMOTransportError` или `IMOTimeoutError`, ошибки файловой системы — как `OSError`.
 
 ```python
-from imo.legacy import extract_attachments
+from imo import extract_attachments
 
 # Выполняется внутри авторизованной сессии.
 message = client.receive_message(timeout=30)
@@ -92,7 +92,7 @@ for result in client.send_many(rows, delay=8, by_name=True):
 ## Обработка входящих сообщений
 
 ```python
-from imo.legacy import IMOClient
+from imo import IMOClient
 
 with IMOClient() as client:
     client.connect()

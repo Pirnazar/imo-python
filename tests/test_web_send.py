@@ -9,8 +9,8 @@ from types import SimpleNamespace
 
 import pytest
 
-from imo.legacy import IMOClient, IMOContactNotFound, IMOPartialSendError, IMOUploadError
-from imo.legacy import _nerv, _nerv_upload as upload
+from imo import IMOClient, IMOContactNotFound, IMOPartialSendError, IMOUploadError
+from imo import _nerv, _nerv_upload as upload
 from test_attachments import SERVER_RESPONSE
 from test_web_client import login, scripted  # noqa: F401  (scripted is a fixture)
 

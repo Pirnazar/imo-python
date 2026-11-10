@@ -1,8 +1,8 @@
-# Sinhron IMO Web müşderisi
+# IMO Web müşderisi
 
 [English](web_client.en.md) · [Русский](web_client.md) · [Türkmençe](web_client.tk.md)
 
-`imo.legacy.IMOClient` — `imo-python 0.6.0` paketindäki sinhron IMO Web müşderisi. Ol aýratyn sessiýa açýar, siz bolsa ony resmi IMO mobil programmasynda tassyklaýarsyňyz. Python 3.11 ýa-da has täze wersiýa gerek. Sessiýa programmanyň ýadynda saklanýar. Her müşderi nusgasyny bir akymda ulanyň. [Asinhron SDK](api.tk.md) · [Resmi IMO Web](https://web.imo.im/) · [QR kod bilen giriş boýunça IMO gollanmasy](https://imo.im/faq/More-Ways-to-Login)
+`imo.IMOClient` — `imo-python 0.7.0` paketindäki sinhron IMO Web müşderisi. Ol aýratyn sessiýa açýar, siz bolsa ony resmi IMO mobil programmasynda tassyklaýarsyňyz. Python 3.11 ýa-da has täze wersiýa gerek. Sessiýa programmanyň ýadynda saklanýar. Her müşderi nusgasyny bir akymda ulanyň. [Resmi IMO Web](https://web.imo.im/) · [QR kod bilen giriş boýunça IMO gollanmasy](https://imo.im/faq/More-Ways-to-Login)
 
 ## Gurnamak we QR kod bilen girmek
 
@@ -16,7 +16,7 @@ python examples/web_qr.py --download-dir imo-downloads
 QR kody telefonda skanirläň we IMO-da girişi tassyklaň. Mysalda `chats` çatlaryň identifikatorlaryny görkezýär, `history BUID` taryhyň iň soňky sahypasyny okaýar, `download BUID 20` soňky 20 habaryň goşundylaryny göçürýär, `members BUID` bolsa toparyň agzalaryny görkezýär. `BUID` — IMO-nyň gaýtarýan çat identifikatory.
 
 ```python
-from imo.legacy import IMOClient
+from imo import IMOClient
 
 with IMOClient(region="sgp", timeout=15) as client:
     client.connect()
@@ -49,7 +49,7 @@ with IMOClient(region="sgp", timeout=15) as client:
 Resminamalaryň, suratlaryň, wideolaryň, ses faýllarynyň we sesli habarlaryň asyl nusgalaryny, şeýle hem IMO-da göçürip alyp bolýan media hökmünde saklanýan GIF-leri ýükläp bolýar. Müşderi goşundynyň maglumatlaryna görä Nerv, Pixel ýa-da IMO ammarynyň HTTPS salgysyny saýlaýar. Maglumat bölekleýin wagtlaýyn faýla ýazylýar. Müşderi tamamlanmadyk faýllary aýyrýar we atlary gabat gelýän faýllara san goşýar. Her goşundy üçin deslapky çäk 256 MiB. Faýl elýeterli bolmasa ýa-da möhleti gutaran bolsa, `IMOAttachmentUnavailable` ýüze çykýar. Faýl çäkden uly bolsa, `IMOAttachmentTooLarge` ýüze çykýar. Ýüklemegiň beýleki ýalňyşlyklary `IMODownloadError`, signal birikmesiniň ýalňyşlyklary `IMOTransportError` ýa-da `IMOTimeoutError`, faýl ulgamynyň ýalňyşlyklary bolsa `OSError` görnüşinde berilýär.
 
 ```python
-from imo.legacy import extract_attachments
+from imo import extract_attachments
 
 # Sessiýa tassyklanandan soň işlediň.
 message = client.receive_message(timeout=30)
@@ -92,7 +92,7 @@ for result in client.send_many(rows, delay=8, by_name=True):
 ## Gelýän habarlary işlemek
 
 ```python
-from imo.legacy import IMOClient
+from imo import IMOClient
 
 with IMOClient() as client:
     client.connect()

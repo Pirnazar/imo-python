@@ -19,6 +19,5 @@ imo-downloads/
 *.sqlite3-wal
 *.sqlite3-shm
 *.part
-research/harness/*.exe
 imo-qr.png
 .runtime/

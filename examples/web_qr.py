@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 import sys
 
-from imo.legacy import IMOClient, IMODownloadError, IMOError
+from imo import IMOClient, IMODownloadError, IMOError
 
 
 

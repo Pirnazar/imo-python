@@ -10,8 +10,8 @@ from types import SimpleNamespace
 import pytest
 from websocket import WebSocketTimeoutException
 
-from imo.legacy import Chat, IMOClient, IMOLoginError, IMORequestError, IMOTimeoutError, IMOTransportError, WebMessage
-from imo.legacy._web_transport import FrameDecoder, WebTransport, encode_frame
+from imo import Chat, IMOClient, IMOLoginError, IMORequestError, IMOTimeoutError, IMOTransportError, WebMessage
+from imo._web_transport import FrameDecoder, WebTransport, encode_frame
 
 
 def test_frame_decoder_handles_partial_and_batched_binary_frames():
@@ -166,7 +166,7 @@ def scripted(monkeypatch):
             assert url == "wss://sgp-webstream.imo.im/wss_webstream"
             assert origin == "https://web.imo.im"
             return sock
-        monkeypatch.setattr("imo.legacy._web_transport.create_connection", connect)
+        monkeypatch.setattr("imo._web_transport.create_connection", connect)
         return sock
     return install
 
@@ -408,7 +408,7 @@ def test_event_queue_discards_unsubscribed_events_but_reports_overflow(scripted,
     socket = scripted()
     with IMOClient() as client:
         login(client)
-        monkeypatch.setattr("imo.legacy._web_transport._MAX_EVENTS", 2)
+        monkeypatch.setattr("imo._web_transport._MAX_EVENTS", 2)
         for _ in range(3):
             socket.downlink(socket.envelope({"type": "unrelated", "name": "ignored"}))
         socket.downlink(socket.envelope({"type": "conv", "name": "recv_im", "edata": {"msg": "ok"}}))
@@ -436,7 +436,7 @@ def test_keepalive_preserves_pending_command(scripted, monkeypatch):
                 raise
 
         monkeypatch.setattr(socket, "recv", recv)
-        monkeypatch.setattr("imo.legacy._web_transport.time", SimpleNamespace(
+        monkeypatch.setattr("imo._web_transport.time", SimpleNamespace(
             time=time.time, time_ns=time.time_ns, monotonic=lambda: now,
         ))
         socket.incoming.append(None)

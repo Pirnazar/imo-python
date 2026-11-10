@@ -1,7 +1,7 @@
 """find_contact and send_many of the IMO Web client, on the scripted socket."""
 import pytest
 
-from imo.legacy import Chat, IMOClient, IMOContactNotFound, IMORequestError, IMOTimeoutError
+from imo import Chat, IMOClient, IMOContactNotFound, IMORequestError, IMOTimeoutError
 
 from test_web_client import login, scripted  # noqa: F401  (scripted is a fixture)
 

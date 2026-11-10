@@ -2,7 +2,7 @@
 import argparse
 import sys
 
-from imo.legacy import IMOClient, IMOError
+from imo import IMOClient, IMOError
 
 
 def main():

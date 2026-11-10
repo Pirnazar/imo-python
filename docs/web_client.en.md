@@ -1,8 +1,8 @@
-# Legacy IMO Web client
+# IMO Web client
 
 [English](web_client.en.md) · [Русский](web_client.md) · [Türkmençe](web_client.tk.md)
 
-`imo.legacy.IMOClient` is the synchronous client for the reverse-engineered IMO Web protocol in `imo-python 0.6.0`. It opens a separate session that you confirm in the official IMO mobile app. The package requires Python 3.11+. The session stays in memory. Use one thread per client instance. [Async SDK](api.md) · [Official IMO Web](https://web.imo.im/) · [IMO QR login help](https://imo.im/faq/More-Ways-to-Login)
+`imo.IMOClient` is the synchronous client for the reverse-engineered IMO Web protocol in `imo-python 0.7.0`. It opens a separate session that you confirm in the official IMO mobile app. The package requires Python 3.11+. The session stays in memory. Use one thread per client instance. [Official IMO Web](https://web.imo.im/) · [IMO QR login help](https://imo.im/faq/More-Ways-to-Login)
 
 ## Installation and QR login
 
@@ -16,7 +16,7 @@ python examples/web_qr.py --download-dir imo-downloads
 Scan the QR with your phone and confirm the login in IMO. In the example, `chats` lists conversation IDs, `history BUID` reads the latest page, `download BUID 20` saves attachments from the latest 20 messages, and `members BUID` lists group members. `BUID` is the conversation ID returned by IMO.
 
 ```python
-from imo.legacy import IMOClient
+from imo import IMOClient
 
 with IMOClient(region="sgp", timeout=15) as client:
     client.connect()
@@ -49,7 +49,7 @@ with IMOClient(region="sgp", timeout=15) as client:
 Downloads support original documents, photos, videos, audio and voice messages, and GIFs represented as downloadable media. The client selects Nerv, Pixel, or an IMO storage HTTPS URL from the message’s attachment metadata. Downloads are streamed to temporary files. The client removes incomplete files and gives duplicate names a numeric suffix. The default limit is 256 MiB per attachment. Missing, expired, or oversized files raise `IMOAttachmentUnavailable` or `IMOAttachmentTooLarge`. Other transfer failures raise `IMODownloadError`. Signaling failures use `IMOTransportError` or `IMOTimeoutError`, and filesystem errors are raised as `OSError`.
 
 ```python
-from imo.legacy import extract_attachments
+from imo import extract_attachments
 
 # Run inside the authenticated session.
 message = client.receive_message(timeout=30)
@@ -92,7 +92,7 @@ Every row is validated before the first send: an empty text or target raises `Va
 ## Listening for messages
 
 ```python
-from imo.legacy import IMOClient
+from imo import IMOClient
 
 with IMOClient() as client:
     client.connect()

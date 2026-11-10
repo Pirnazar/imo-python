@@ -13,7 +13,7 @@ from websocket import WebSocketException, WebSocketTimeoutException
 
 from ._nerv import IMODownloadError, _HEADER, _MAX_PACKET, _Reader, _open_file_server, _packet, _string
 from ._web_transport import IMORequestError, _USER_AGENT, random_id
-from .web_models import _timestamp
+from .models import _timestamp
 
 
 _BATCH_REQUEST = 2592002
