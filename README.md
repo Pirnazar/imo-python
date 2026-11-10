@@ -2,7 +2,7 @@
 
 A Python client for IMO Web. It uses the Web protocol directly and opens a separate session that you confirm by scanning a QR code in the official IMO app.
 
-[English](docs/web_client.en.md) · [Русский](docs/web_client.md) · [Türkmençe](docs/web_client.tk.md)
+[English](docs/web_client.en.md) · [Русский](docs/web_client.md) · [Türkmençe](docs/web_client.tk.md) · [API reference](docs/api.md) · [Examples](examples/README.md)
 
 ## Installation
 
@@ -14,6 +14,13 @@ python examples/web_qr.py
 ```
 
 `IMOClient()` uses IMO Web directly. The `qr` extra enables terminal rendering. To render the QR yourself, pass `show_qr=` to `connect()` and install the base package.
+
+Try the offline examples to inspect attachment metadata or preview a CSV before signing in.
+
+```sh
+python examples/inspect_attachments.py
+python examples/send_batch.py examples/batch.example.csv
+```
 
 ## Quick start
 
@@ -29,7 +36,7 @@ with IMOClient() as client:
     # client.send_message(name="Enem", text="Salam!")
 ```
 
-The client lists contacts, chats and group members, reads history, sends text and attachments, and dispatches incoming messages. Use `get_history()` for a single page or `iter_history()` to follow pages. Pass a history record or incoming message to `download_attachments()`.
+Use `examples/contacts.py` or `examples/chats.py` to find a BUID, the conversation ID returned by IMO. Pass the BUID to `get_history()` for one page or `iter_history()` to follow pages. Pass a history record or incoming message to `download_attachments()`.
 
 ```python
 with IMOClient() as client:
@@ -43,6 +50,8 @@ with IMOClient() as client:
 ```
 
 Use each client instance from one thread. The session stays in memory. `logout()` asks the server to end it.
+
+For more commands, see the [examples catalog](examples/README.md). For help with QR codes, exact-name matching, and send timeouts, see [troubleshooting](docs/troubleshooting.md).
 
 ## Verification
 

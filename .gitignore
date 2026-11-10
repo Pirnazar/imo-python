@@ -20,4 +20,5 @@ imo-downloads/
 *.sqlite3-shm
 *.part
 imo-qr.png
+imo-qr.svg
 .runtime/

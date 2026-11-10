@@ -1,6 +1,6 @@
 # IMO Web müşderisi
 
-[English](web_client.en.md) · [Русский](web_client.md) · [Türkmençe](web_client.tk.md)
+[English](web_client.en.md) · [Русский](web_client.md) · [Türkmençe](web_client.tk.md) · [Mysallar](../examples/README.md) · [API maglumatnamasy](api.md)
 
 `imo.IMOClient` — `imo-python 0.7.0` paketindäki sinhron IMO Web müşderisi. Ol aýratyn sessiýa açýar, siz bolsa ony resmi IMO mobil programmasynda tassyklaýarsyňyz. Python 3.11 ýa-da has täze wersiýa gerek. Sessiýa programmanyň ýadynda saklanýar. Her müşderi nusgasyny bir akymda ulanyň. [Resmi IMO Web](https://web.imo.im/) · [QR kod bilen giriş boýunça IMO gollanmasy](https://imo.im/faq/More-Ways-to-Login)
 
@@ -14,6 +14,8 @@ python examples/web_qr.py --download-dir imo-downloads
 ```
 
 QR kody telefonda skanirläň we IMO-da girişi tassyklaň. Mysalda `chats` çatlaryň identifikatorlaryny görkezýär, `history BUID` taryhyň iň soňky sahypasyny okaýar, `download BUID 20` soňky 20 habaryň goşundylaryny göçürýär, `members BUID` bolsa toparyň agzalaryny görkezýär. `BUID` — IMO-nyň gaýtarýan çat identifikatory.
+
+Terminaldaky QR kody skanirlemek kyn bolsa, [qr_to_file.py](../examples/qr_to_file.py) skriptini işlediň we ýerli SVG faýlyny brauzerde açyň. Hasaba girmän [inspect_attachments.py](../examples/inspect_attachments.py) mysalyny işledip bolýar. Tor bilen işleýän her skript täze sessiýa açýar. Bir gezek skanirläp birnäçe amal ýerine ýetirmek üçin interaktiw mysaly ulanyň.
 
 ```python
 from imo import IMOClient
@@ -87,7 +89,7 @@ for result in client.send_many(rows, delay=8, by_name=True):
     print(result.target, "ok" if result.ok else result.error)
 ```
 
-Ähli setirler ilkinji ibermezden öň barlanýar: boş tekst ýa-da alyjy `ValueError` döredýär we hiç zat iberilmeýär. Serwer habary tassyklamasa ýa-da at tapylmasa, ýalňyşlyk `SendResult.error` meýdanyna ýazylýar we ibermek dowam edýär; `stop_on_error=True` ilkinji ýalňyşlykda durýar. Garaşmagyň möhleti dolsa ýa-da birikme ýitse, sessiýa tamamlanýar: ibermek durýar, soňky netijede ýalňyşlyk bolýar, galan setirler gaýtarylmaýar. Jogapsyz galan habar gaýtadan iberilmeýär. Nätanyş adamlara köpçülikleýin habar ibermek spamdyr we hasabyň petiklenmegine getirip biler.
+Müşderi ilkinji habary ibermezden öň setirleriň gurluşyny we tekstini barlaýar. `stop_on_error=True` netijelerde ilkinji ýalňyşlyk ýüze çykanda ibermegi bes edýär. Soraga garaşmagyň möhleti dolsa, sessiýa ýapylýar we ýalňyşlyk setiriň netijesinde görkezilýär. Arakesme wagtynda birikme üzülse, usul ýalňyşlyk bilen tamamlanyp biler. CSV-ni öňünden görmek we ähli alyjylary doly gabat gelýän atlary boýunça tapmak üçin [send_batch.py](../examples/send_batch.py) ulanyň.
 
 ## Gelýän habarlary işlemek
 
@@ -114,7 +116,9 @@ Hakyky IMO serweri QR kod berdi we IMO-nyň açyk CDN-i kitaphananyň HTTPS ýü
 
 ```text
 python -m pip install -e ".[dev,qr]"
-python -m pytest -q tests/test_web_client.py tests/test_attachments.py
+python -m pytest -q
 ```
 
 Hakyky QR kod alnyşyny we açyk CDN-den ýüklemäni hem barlamak üçin `IMO_WEB_LIVE` gurşaw üýtgeýjisine `1` bahasyny beriň.
+
+Serwer iberişi tassyklamasa, habaryň çatda peýda bolandygyny barlaň. `IMOPartialSendError` ýüze çyksa, faýlyň tassyklamasy `error.attachment` meýdanynda bolýar. At boýunça birnäçe kontakt gabat gelse, kontaktlaryň sanawyndaky BUID-ni ulanyň. [Beýleki ýalňyşlyklar we çözgütler](troubleshooting.md)

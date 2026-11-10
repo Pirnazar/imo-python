@@ -1,6 +1,6 @@
 # IMO Web client
 
-[English](web_client.en.md) · [Русский](web_client.md) · [Türkmençe](web_client.tk.md)
+[English](web_client.en.md) · [Русский](web_client.md) · [Türkmençe](web_client.tk.md) · [Examples](../examples/README.md) · [API reference](api.md)
 
 `imo.IMOClient` is the synchronous client for the reverse-engineered IMO Web protocol in `imo-python 0.7.0`. It opens a separate session that you confirm in the official IMO mobile app. The package requires Python 3.11+. The session stays in memory. Use one thread per client instance. [Official IMO Web](https://web.imo.im/) · [IMO QR login help](https://imo.im/faq/More-Ways-to-Login)
 
@@ -14,6 +14,8 @@ python examples/web_qr.py --download-dir imo-downloads
 ```
 
 Scan the QR with your phone and confirm the login in IMO. In the example, `chats` lists conversation IDs, `history BUID` reads the latest page, `download BUID 20` saves attachments from the latest 20 messages, and `members BUID` lists group members. `BUID` is the conversation ID returned by IMO.
+
+If the terminal QR is hard to scan, run [qr_to_file.py](../examples/qr_to_file.py) and open the local SVG in a browser. For a script you can run offline, try [inspect_attachments.py](../examples/inspect_attachments.py). Each account script opens a fresh session. Use the interactive example to combine operations after one scan.
 
 ```python
 from imo import IMOClient
@@ -87,7 +89,7 @@ for result in client.send_many(rows, delay=8, by_name=True):
     print(result.target, "ok" if result.ok else result.error)
 ```
 
-Every row is validated before the first send: an empty text or target raises `ValueError` and nothing is sent. When the server does not confirm a message, or a name is not found, the error is stored in `SendResult.error` and the batch continues; `stop_on_error=True` stops at the first error. A timeout or a lost connection ends the session, so the batch stops, the last result carries the error, and the remaining rows are not returned. An unanswered message is never resent. Bulk messages to strangers are spam and a quick way to lose the account.
+The client validates row structure and text before sending. If a send request times out, the session closes and the failed row records the error. If the connection breaks during a pause, the call can raise directly. For a CSV preview and exact contact matching before the first send, use [send_batch.py](../examples/send_batch.py).
 
 ## Listening for messages
 
@@ -114,7 +116,9 @@ The real IMO server issued a QR challenge, and the public IMO CDN returned a PNG
 
 ```text
 python -m pip install -e ".[dev,qr]"
-python -m pytest -q tests/test_web_client.py tests/test_attachments.py
+python -m pytest -q
 ```
 
 Set the `IMO_WEB_LIVE` environment variable to `1` to also run the live QR and public CDN checks.
+
+See [troubleshooting](troubleshooting.md) for expired QR codes, ambiguous names, and incomplete sends.
