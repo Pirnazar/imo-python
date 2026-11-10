@@ -1,6 +1,6 @@
 import sqlite3
 
-from imo import ChatType
+from imo.models import ChatType
 from imo.localdb import LocalDB
 
 

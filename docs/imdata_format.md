@@ -83,5 +83,5 @@ constitute a working encoder or client:
 - Assembling and transmitting a valid `imdata` would mean re-implementing imo's closed
   messaging protocol and running its own authenticated connection — explicitly out of scope.
 
-Use this to **understand/parse** structures and to type your tooling (see `python/imo/models.py`),
+Use this to **understand/parse** structures and to type your tooling (see `src/imo/models.py`),
 not to send on your account.

@@ -13,6 +13,7 @@ from websocket import WebSocketException, WebSocketTimeoutException, create_conn
 
 
 _ORIGIN = "https://web.imo.im"
+_USER_AGENT = "imoWebApp/1.0.0; Python"
 _HOSTS = {
     "sgp": ("sgp-webstream.imo.im", "3g"),
     "sjc": ("webstream.imo.im", "3f"),
@@ -20,6 +21,16 @@ _HOSTS = {
 }
 _MAX_FRAME = 8 * 1024 * 1024
 _MAX_EVENTS = 1024
+_KEEPALIVE_IDLE = 180.0
+_SESSION_ENDED = {("pin", "not_authenticated"), ("session", "signoff_all")}
+_LOGIN_CHALLENGE_EVENTS = {
+    ("session", "qr_code_scanned"),
+    ("session", "qr_code_login_completed"),
+    ("session", "qr_code_login_cancelled"),
+}
+_LOGIN_RESULT_EVENTS = {("account", "signed_on"), ("session", "cookie_login_failed")}
+_MESSAGE_EVENTS = {("conv", "recv_im")}
+_CLIENT_EVENTS = _SESSION_ENDED | _LOGIN_CHALLENGE_EVENTS | _LOGIN_RESULT_EVENTS | _MESSAGE_EVENTS
 
 
 class IMOError(Exception):
@@ -99,6 +110,7 @@ class WebTransport:
         self._events = deque()
         self._awaiting = None
         self._clock_offset = 0
+        self._last_traffic = time.monotonic()
 
     def open(self):
         try:
@@ -133,6 +145,10 @@ class WebTransport:
     def now_ns(self):
         return time.time_ns() + self._clock_offset
 
+    @property
+    def device_id(self):
+        return self._device
+
     def pop_event(self, names):
         for index, event in enumerate(self._events):
             if (event.get("type"), event.get("name")) in names:
@@ -154,6 +170,7 @@ class WebTransport:
         try:
             self._ws.settimeout(self.timeout)
             self._ws.send_binary(encode_frame(message))
+            self._last_traffic = time.monotonic()
         except (WebSocketException, OSError):
             raise IMOTransportError("Unable to send on the IMO Web connection") from None
 
@@ -173,6 +190,7 @@ class WebTransport:
                 raise IMOTransportError("IMO Web disconnected") from None
             if not isinstance(received, bytes):
                 raise IMOTransportError("IMO Web closed the signaling stream")
+            self._last_traffic = time.monotonic()
             self._frames.extend(self._decoder.feed(received))
         return self._frames.popleft()
 
@@ -180,7 +198,7 @@ class WebTransport:
         self._send({
             "method": "forward_to_server",
             "headers": {
-                "ua": "imoWebApp/1.0.0; Python",
+                "ua": _USER_AGENT,
                 "c": {"iat": self._client_token, "UDID": self._device},
                 "sim_iso": None, "route_num": 0, "connection_type": "",
                 "is-alpha": False, "ext_info": {"cdn_domain": "webstream.imo.im"},
@@ -189,7 +207,19 @@ class WebTransport:
         })
 
     def _pump(self, deadline):
-        frame = self._receive(deadline)
+        while True:
+            idle_deadline = self._last_traffic + _KEEPALIVE_IDLE
+            now = time.monotonic()
+            if idle_deadline <= now < deadline:
+                self._send_command("dispatcher", "keep_alive", {"ssid": self.ssid}, random_id(8))
+                idle_deadline = self._last_traffic + _KEEPALIVE_IDLE
+            try:
+                frame = self._receive(min(deadline, idle_deadline))
+            except IMOTimeoutError:
+                if idle_deadline < deadline and idle_deadline <= time.monotonic() < deadline:
+                    continue
+                raise
+            break
         body = frame.get("data")
         messages = body.get("messages") if isinstance(body, dict) else None
         if not isinstance(messages, list) or not messages:
@@ -216,22 +246,26 @@ class WebTransport:
                 if "response" not in body:
                     raise IMOTransportError("IMO Web omitted the response payload")
                 self._responses[request_id] = body["response"]
-            elif "name" in body and "type" in body:
+            elif (isinstance(body.get("type"), str) and isinstance(body.get("name"), str)
+                  and (body["type"], body["name"]) in _CLIENT_EVENTS):
                 if len(self._events) >= _MAX_EVENTS:
-                    self._events.popleft()
+                    raise IMOTransportError("IMO Web event buffer exceeded its limit")
                 self._events.append(body)
         self._forward([])
 
-    def request(self, system, method, params, *, response=True):
-        request_id = random_id(8)
+    def _send_command(self, system, method, params, request_id):
         seq = self._uplink
         self._uplink += 1
+        self._forward([{
+            "data": {"data": params, "request_id": request_id, "method": method},
+            "seq": seq, "to": {"system": system}, "from": {"system": "client", "ssid": self.ssid},
+        }])
+
+    def request(self, system, method, params, *, response=True):
+        request_id = random_id(8)
         self._awaiting = request_id if response else None
         try:
-            self._forward([{
-                "data": {"data": params, "request_id": request_id, "method": method},
-                "seq": seq, "to": {"system": system}, "from": {"system": "client", "ssid": self.ssid},
-            }])
+            self._send_command(system, method, params, request_id)
             if not response:
                 return None
             deadline = time.monotonic() + self.timeout

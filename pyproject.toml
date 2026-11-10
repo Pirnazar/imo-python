@@ -1,33 +1,80 @@
 [build-system]
-requires = ["setuptools>=64"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "imo-python"
-version = "0.3.0"
-description = "Python client for IMO Web with QR login, chat history, and attachment downloads."
+version = "0.6.0"
+description = "Typed, async-first Python SDK for IMO adapter development."
 readme = "README.md"
-requires-python = ">=3.8"
-license = { text = "MIT" }
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [{ name = "imo-python" }]
 keywords = ["imo", "reverse-engineering", "data-models", "imdata"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Programming Language :: Python :: 3",
     "Topic :: Software Development :: Libraries",
-    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3 :: Only",
+    "Typing :: Typed",
 ]
-dependencies = ["websocket-client>=1.8,<2"]
+dependencies = []
 
 [project.optional-dependencies]
-dev = ["pytest>=7"]
-qr = ["qrcode>=7.4,<9"]
+dev = [
+    "build>=1.2",
+    "mypy>=1.11,<3",
+    "pytest>=8,<10",
+    "pytest-asyncio>=0.24,<2",
+    "ruff>=0.9,<1",
+    "twine>=6,<7",
+    "websocket-client>=1.8,<2",
+    "qrcode>=7.4,<9",
+]
+web = ["websocket-client>=1.8,<2"]
+qr = ["websocket-client>=1.8,<2", "qrcode>=7.4,<9"]
+native = ["qrcode>=7.4,<9; sys_platform == 'win32'"]
 
 [tool.setuptools]
-package-dir = { "" = "python" }
+package-dir = { "" = "src" }
 
 [tool.setuptools.packages.find]
-where = ["python"]
+where = ["src"]
+namespaces = false
+
+[tool.setuptools.package-data]
+imo = ["py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+asyncio_mode = "strict"
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.ruff]
+target-version = "py311"
+extend-exclude = [".runtime", "research"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/imo/legacy/__init__.py" = ["F401", "F403"]
+"tests/test_web_batch.py" = ["F811"]
+"tests/test_web_send.py" = ["F811"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+files = [
+    "src/imo/__init__.py",
+    "src/imo/client.py",
+    "src/imo/manager.py",
+    "src/imo/types.py",
+    "src/imo/filters.py",
+    "src/imo/transport.py",
+    "src/imo/errors.py",
+    "src/imo/connection.py",
+    "src/imo/_dispatcher.py",
+]

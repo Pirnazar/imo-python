@@ -104,18 +104,21 @@ def _attachment(obj, defaults, kind):
     return Attachment(kind, _safe_name(filename), size, sources)
 
 
-def extract_attachments(message: Mapping) -> list[Attachment]:
-    """Read originals from a history row, incoming message, or an imdata mapping."""
-    if not isinstance(message, Mapping):
-        raise TypeError("message must be a mapping")
+def _message_imdata(message):
     imdata = message.get("imdata", message)
     if isinstance(imdata, str):
         try:
             imdata = json.loads(imdata)
         except ValueError:
-            return []
-    if not isinstance(imdata, Mapping):
-        return []
+            return {}
+    return imdata if isinstance(imdata, Mapping) else {}
+
+
+def extract_attachments(message: Mapping) -> list[Attachment]:
+    """Read originals from a history row, incoming message, or an imdata mapping."""
+    if not isinstance(message, Mapping):
+        raise TypeError("message must be a mapping")
+    imdata = _message_imdata(message)
     root_type = _first_text(imdata.get("type"), imdata.get("object_type"))
     root_kind = _KINDS.get(root_type)
     if root_type and not root_kind and root_type != "im":

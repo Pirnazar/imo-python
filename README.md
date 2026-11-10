@@ -1,112 +1,92 @@
 # imo-python
 
-## Python-клиент IMO Web
+[English](docs/api.md) · [Русский](docs/api.ru.md) · [Türkmençe](docs/api.tk.md)
 
-Версия 0.3.0 добавляет скачивание файлов и медиа из истории чатов и входящих сообщений. Клиент поддерживает вход по QR-коду, контакты, список бесед, историю и отправку текста. В руководствах описаны установка, API и результаты проверок.
+A typed, async-first Python SDK for building IMO integrations around an explicit transport adapter. The core uses the standard library.
 
-[English](docs/web_client.en.md) · [Русский](docs/web_client.md) · [Türkmençe](docs/web_client.tk.md)
+**Version 0.6.0.** The async SDK has no bundled live IMO adapter. Its API and event lifecycle are tested with a fixture adapter. The synchronous Web client, Windows bridge, offline parsers, and reverse-engineering material remain available separately.
 
-## Исследование IMO Windows
+## Installation
 
+From a checkout, with Python 3.11 or newer.
 
-Проверка установленной сборки от 10 ноября 2026 года. Загрузка и вызов локальных .NET-функций из отдельного x86-процесса работают. Подключение к сессии запущенного IMO через обнаруженные интерфейсы не подтвердилось. Тестовый стенд и диагностические скрипты воспроизводят результат.
+```sh
+python -m pip install .
+```
 
-[Технический отчёт](docs/integration-report.md) · [Граф зависимостей](research/evidence/dependencies.dot) · [Снимок измерений](research/evidence/snapshot.txt) · [Вызовы из IL](research/evidence/cold.txt)
+Install `.[qr]` for the legacy Web client and terminal QR rendering. Use `.[web]` when your code renders the QR itself. On Windows, `.[native]` installs the bridge's optional terminal QR dependency. Building the bridge also requires the locally installed IMO assemblies and .NET Framework.
 
-## QR-вход и жизненный цикл сессии
+## Quick Start
 
-- [Запуск, профиль и загрузка чатов](docs/application_lifecycle.md)
-- [Запрос QR, TTL, сканирование и завершение](docs/qr_authentication_flow.md)
-- [Состояния входа, восстановление и sign-off](docs/session_state_machine.md)
-- [Сигнальное соединение и reconnect](docs/connection_lifecycle.md)
-- [Путь входящего сообщения](docs/incoming_message_flow.md)
-- [Архитектура Python-интеграции](docs/python_integration_feasibility.md)
-
-[Карта сборок](research/assembly_map/README.md) · [Трассы и наблюдения](research/lifecycle_traces/README.md) · [Воспроизведение](research/diagnostic_tools/README.md)
-
-## Нативный транспорт
-
-[Реверс libgonet и libtitancpp](docs/native_transport_reverse.md) · [ABI, RTTI, таблицы вызовов и воспроизведение](research/native_transport/README.md)
-
-## Офлайн-функции Python
-
-Пакет содержит модели, парсер `parse_imdata` для уже имеющихся JSON-объектов и `imo.localdb.LocalDB` для чтения `T_Chater` из отдельной копии SQLite. Передавайте файл явно.
+`python examples/basic.py` runs today and prints the explicit missing-transport error. `python examples/parse_messages.py` exercises the offline parsers. The other async examples take an adapter supplied by the caller.
 
 ```python
-from imo.localdb import LocalDB
+from imo import IMOClient
+from imo.transport import Transport
 
-cache = LocalDB(path=r"D:\snapshots\db1.db")
-for chat in cache.chats():
-    print(chat.key_id, chat.chat_type.name)
+
+async def show_profile(transport: Transport) -> None:
+    async with IMOClient("main", transport=transport) as client:
+        print(await client.get_me())
 ```
 
-Для SQLite используйте согласованную копию, включающую изменения из журнала на момент копирования. На установленной копии IMO таблица чатов существует и пуста. Разбор заполненной таблицы проверен на синтетических строках той же схемы.
+## Connection
 
-```powershell
-python -m pip install -e '.[dev]'
-python -B -m pytest -q
+An account name identifies the client locally. Supply an adapter with `IMOClient("main", transport=adapter)` and let `async with` manage its connection, or call `connect()` and `disconnect()` explicitly. `client.capabilities` lists supported operations. The SDK stores no authentication material.
+
+## Messages
+
+`await client.send_message(chat_id="123456", text="Hello!")` returns a `Message` when the adapter supports text sending. `get_history(chat_id, limit=20)` yields messages asynchronously. IDs, sender IDs, timestamps, and direction reflect the fields supplied by the adapter.
+
+`await message.reply("Hello!")` requires reply support and a stable message ID. `await message.download("downloads")` returns a tuple of saved paths when the adapter supports downloads. A missing capability raises `FeatureUnavailableError`. Text sends are never automatically retried.
+
+## Receiving Events
+
+```python
+from imo import IMOClient, Message, filters
+from imo.transport import Transport
+
+
+def listen(transport: Transport) -> None:
+    client = IMOClient("main", transport=transport)
+
+    @client.on_message(filters.incoming & filters.text)
+    async def handle(client: IMOClient, message: Message) -> None:
+        print(client.account_id, message.text)
+
+    client.run()
 ```
 
-## Воспроизведение
+From an existing event loop use `await client.run_until_disconnected()`. The dispatcher preserves arrival order within each chat, limits queued events, and logs handler failures independently. Reconnect is opt-in. Replay suppression uses stable message IDs and a bounded cache.
 
-Нужны Windows, PowerShell, Python 3.10+, .NET Framework 4.6.1 или более новая версия семейства 4.x и референсные сборки 4.6.1. Для статического анализа использованы [Mono.Cecil 0.11.6](https://www.nuget.org/packages/Mono.Cecil/0.11.6), [ILSpy CLI 9.1](https://www.nuget.org/packages/ilspycmd/9.1.0.7988) с .NET 8 и [pefile 2024.8.26](https://pypi.org/project/pefile/2024.8.26/).
+## Contacts & Chats
 
-Из корня проекта в PowerShell, при запущенном IMO:
+With an adapter that supports these operations, iterate `client.get_contacts()` for `User` records or `client.get_chats()` for `Chat` records. A chat has an `id`, an optional `title`, and an optional `kind`.
 
-```powershell
-$imo = Get-Process -Name ImoDesktopApp
-$install = Split-Path $imo.Path
-$work = Join-Path $env:TEMP 'imo-research-tools'
-New-Item -ItemType Directory -Force $work | Out-Null
+## Multiple Accounts
 
-$packages = @{
-    'microsoft.netframework.referenceassemblies.net461' = '1.0.3'
-    'mono.cecil' = '0.11.6'
-    'ilspycmd' = '9.1.0.7988'
-}
-foreach ($name in $packages.Keys) {
-    $version = $packages[$name]
-    $zip = Join-Path $work "$name.zip"
-    curl.exe --fail --silent --show-error --location "https://api.nuget.org/v3-flatcontainer/$name/$version/$name.$version.nupkg" -o $zip
-    if ($LASTEXITCODE) { throw "Download failed for $name" }
-    Expand-Archive -LiteralPath $zip -DestinationPath (Join-Path $work $name) -Force
-}
+Register each client with `IMOManager.add(client)` and supply a separate adapter instance per account. Use `manager.run()` from synchronous code or `await manager.run_async()` in an existing event loop. Failures are logged and returned by account ID when the listeners finish. Isolation is verified with fixture adapters. Concurrent live IMO sessions still need validation.
 
-$refs = "$work\microsoft.netframework.referenceassemblies.net461\build\.NETFramework\v4.6.1"
-$exe = .\research\harness\Build.ps1 -ReferenceAssemblies $refs -OutputDirectory "$work\harness"
-& $exe $install
-python -B .\research\cold_probe.py $install $exe
-python -B .\research\probe.py live --pid $imo.Id --install $install --harness $exe
-python -B .\research\probe.py cache
+## Error Handling
+
+Catch `IMOError` from `imo.errors` for SDK failures. `FeatureUnavailableError` indicates a missing adapter or operation. `AuthenticationRequired` and `SessionExpired` indicate an authorization requirement. `IMOConnectionError`, `TransportError`, `ChatNotFound`, and `MessageSendError` distinguish connection, adapter, lookup, and sending failures.
+
+## Current Limitations
+
+- The async facade requires a caller-supplied adapter and cannot authenticate against IMO on its own.
+- The [legacy Web client](docs/web_client.en.md) uses `imo.legacy.IMOClient`. Its QR challenge and public CDN access were tested against IMO. Account operations and file uploads still need independent end-to-end verification.
+- The [Windows bridge](docs/desktop_bridge.md) uses `imo.desktop.IMOClient` and a separate x86 executable. It is retained for research and compatibility.
+- The [offline models](docs/data_models.md), `imo.models.parse_imdata`, and `imo.localdb.LocalDB` remain available.
+
+## Development
+
+```sh
+python -m pip install -e ".[dev]"
+python -m pytest
+python -m ruff check .
+python -m mypy
+python -m build
+python -m twine check --strict dist/imo_python-0.6.0-py3-none-any.whl dist/imo_python-0.6.0.tar.gz
 ```
 
-`cold_probe.py` создаёт временный профиль AppContainer без capabilities и копирует туда бинарники для теста. Дочерний стенд проверяет токен до инициализации защищённых модулей. Профиль и копии удаляются по окончании.
-
-```powershell
-$env:IMO_INSTALL = $install
-$env:IMO_HARNESS = $exe
-$env:IMO_PID = $imo.Id
-python -B -m unittest discover -s tests -v
-```
-
-Без переменных `IMO_*` запускаются пять локальных тестов диагностики.
-
-## Статический анализ
-
-```powershell
-.\research\Inspect-Managed.ps1 -InstallDirectory $install -CecilDll "$work\mono.cecil\lib\net40\Mono.Cecil.dll" -OutputDirectory "$work\inventory"
-
-$ilspy = "$work\ilspycmd\tools\net8.0\any\ilspycmd.dll"
-dotnet $ilspy --disable-updatecheck -t Imo.Dispatcher.Manager "$install\Imo.Dispatcher.dll"
-dotnet $ilspy --disable-updatecheck -t Imo.Message.ViewModels.ConversationViewModel -r $install "$install\Plugs\Imo.Message.dll"
-
-python -m pip install --target "$work\python" pefile==2024.8.26
-$env:PYTHONPATH = "$work\python"
-python -B .\research\probe.py pe --install $install ImoDesktopApp.exe Imo.DataCore.dll Imo.ChannelNetwork.dll libtitancpp.dll libgonet.dll proxy.dll apm-nativecrash.dll
-```
-
-Дополнительная проверка типов дескрипторов через снимок NT требует 64-битного Python на 64-битной Windows. Она может вернуть неполный список.
-
-```powershell
-python -B .\research\probe_handles.py $imo.Id
-```
+Default tests use fixtures and local data. Windows and network research tests are opt-in. [Public API](docs/api.md) · [Architecture and capabilities](docs/architecture.md) · [Reverse-engineering index](docs/research_index.md)

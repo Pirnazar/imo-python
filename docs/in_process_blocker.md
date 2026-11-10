@@ -49,7 +49,7 @@ to the live session — that object is not shared across processes.
 
 ## What remains possible (no injection, no second client)
 
-- The shipped read-only layer: `python/imo/` (data models, `imdata` parser, `localdb.py`
+- The shipped read-only layer: `src/imo/` (data models, `imdata` parser, `localdb.py`
   reading your own `db1.db`). Inert; no network.
 - Driving the user's own running client through its UI (out of scope for this spec, but the
   only non-injection way to send from *this* desktop client), or the Android `adb` route.

@@ -1,11 +1,29 @@
 """Scan a fresh QR in your terminal and keep one account session for multiple operations."""
 import argparse
+import csv
 import json
+from pathlib import Path
 import sys
 
-import qrcode
+from imo.legacy import IMOClient, IMODownloadError, IMOError
 
-from imo import IMOClient, IMODownloadError, IMOError, extract_attachments
+
+
+def read_batch(path):
+    """Rows of ``contact;text`` (or comma/tab separated). ``#`` lines and a header row are skipped."""
+    lines = [line for line in Path(path).read_text(encoding="utf-8-sig").splitlines() if line.strip()]
+    if not lines:
+        return []
+    rows = []
+    for row in csv.reader(lines, csv.Sniffer().sniff(lines[0], delimiters=";,\t")):
+        if not row or row[0].strip().startswith("#"):
+            continue
+        if len(row) < 2:
+            raise ValueError(f"row without text: {row}")
+        if row[0].strip().casefold() in ("contact", "контакт"):
+            continue
+        rows.append((row[0].strip(), row[1].replace("\\n", "\n")))
+    return rows
 
 
 def main():
@@ -13,18 +31,15 @@ def main():
     parser.add_argument("--region", choices=("sgp", "sjc", "fra"), default="sgp")
     parser.add_argument("--download-dir", default="imo-downloads",
                         help="Output directory for the download command")
+    parser.add_argument("--delay", type=float, default=8.0,
+                        help="Seconds between messages of the batch command (±30%%)")
     args = parser.parse_args()
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
     with IMOClient(region=args.region) as client:
-        challenge = client.begin_qr_login()
-        image = qrcode.QRCode(border=4)
-        image.add_data(challenge.payload)
-        image.print_ascii(invert=True)
-        print(f"Scan and confirm in the official IMO phone app. The QR lasts {challenge.ttl}s.")
-        client.wait_for_login()
+        client.connect()
         print("Commands: me, contacts, chats, history BUID, download BUID [LIMIT], "
-              "send BUID TEXT, receive, logout, exit")
+              "members BUID, send BUID TEXT, sendto NAME | TEXT, batch FILE.csv, receive, logout, exit")
         while True:
             try:
                 verb, _, argument = input("imo> ").strip().partition(" ")
@@ -40,12 +55,14 @@ def main():
                     result = client.get_chats()
                 elif verb == "history":
                     result = client.get_history(argument)
+                elif verb == "members":
+                    result = [{"uid": member.uid, "name": member.display, "owner": member.is_owner}
+                              for member in client.get_group_members(argument)]
                 elif verb == "download":
                     buid, _, limit = argument.partition(" ")
-                    rows = client.get_history(buid, limit=int(limit) if limit else 50)
                     result = []
-                    for row in rows:
-                        for attachment in extract_attachments(row):
+                    for message in client.iter_history(buid, max_messages=int(limit) if limit else 50):
+                        for attachment in message.attachments:
                             try:
                                 path = client.download_attachment(attachment, args.download_dir)
                             except IMODownloadError as error:
@@ -56,6 +73,13 @@ def main():
                     buid, _, text = argument.partition(" ")
                     receipt = client.send_message(buid, text)
                     result = {"message_id": receipt.message_id, "timestamp_nano": receipt.timestamp_nano}
+                elif verb == "sendto":
+                    name, _, text = argument.partition("|")
+                    receipt = client.send_message(name=name, text=text.strip())
+                    result = {"buid": receipt.buid, "timestamp_nano": receipt.timestamp_nano}
+                elif verb == "batch":
+                    result = [{"to": row.target, "ok": row.ok, "error": str(row.error) if row.error else None}
+                              for row in client.send_many(read_batch(argument), delay=args.delay, by_name=True)]
                 elif verb == "receive":
                     result = client.receive_message(timeout=30)
                 elif verb == "logout":

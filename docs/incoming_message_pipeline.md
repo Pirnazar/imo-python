@@ -56,7 +56,7 @@ fields map to your target `Message` as:
 | `is_outgoing` | `MessageType.Sent` vs `Received` | |
 | `id` | not a stable public field at this layer | may be absent |
 
-`parse_imdata` in `python/imo/models.py` already produces this typed view from a payload.
+`parse_imdata` in `src/imo/models.py` already produces this typed view from a payload.
 
 ## The subscription blocker
 

@@ -1,0 +1,6 @@
+recursive-include docs *.md
+recursive-include examples *.py
+recursive-include native *.cs *.ps1 *.exe.config
+recursive-include research *.cs *.ps1 *.exe.config *.dot *.json *.md *.py *.txt
+recursive-include tests *.py
+global-exclude *.py[cod] *.dll *.exe *.sqlite* *.db *.whl .env .env.*

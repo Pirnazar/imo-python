@@ -1,5 +1,5 @@
 """Unit tests for the read-only data-model / imdata layer."""
-from imo import (
+from imo.models import (
     ChatType,
     Head,
     Message,

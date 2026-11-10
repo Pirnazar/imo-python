@@ -9,7 +9,7 @@ import unittest
 
 RESEARCH = Path(__file__).resolve().parents[1] / "research"
 sys.path.insert(0, str(RESEARCH))
-from probe import activation_port, cache_status, tcp_listeners
+from probe import activation_port, cache_status, tcp_listeners  # noqa: E402
 
 
 class ProbeTests(unittest.TestCase):

@@ -4,12 +4,14 @@ from collections import deque
 import base64
 import os
 import struct
+import time
+from types import SimpleNamespace
 
 import pytest
 from websocket import WebSocketTimeoutException
 
-from imo import IMOClient, IMOLoginError, IMOTimeoutError, IMOTransportError
-from imo._web_transport import FrameDecoder, WebTransport, encode_frame
+from imo.legacy import Chat, IMOClient, IMOLoginError, IMORequestError, IMOTimeoutError, IMOTransportError, WebMessage
+from imo.legacy._web_transport import FrameDecoder, WebTransport, encode_frame
 
 
 def test_frame_decoder_handles_partial_and_batched_binary_frames():
@@ -26,7 +28,11 @@ def test_frame_decoder_handles_partial_and_batched_binary_frames():
 
 
 class ScriptedSocket:
-    def __init__(self, *, cancelled=False, timeout_on_send=False, history_message=None):
+    def __init__(self, *, cancelled=False, timeout_on_send=False, history_message=None, history_pages=None,
+                 unconfirmed=(), buddies=None, file_server_response=None):
+        self.unconfirmed = set(unconfirmed)
+        self.buddies = buddies
+        self.file_server_response = file_server_response
         self.decoder = FrameDecoder()
         self.incoming = deque()
         self.calls = []
@@ -36,6 +42,7 @@ class ScriptedSocket:
         self.cancelled = cancelled
         self.timeout_on_send = timeout_on_send
         self.history_message = history_message
+        self.history_pages = history_pages
         self.closed = False
 
     def settimeout(self, value):
@@ -47,7 +54,10 @@ class ScriptedSocket:
     def recv(self):
         if not self.incoming:
             raise WebSocketTimeoutException()
-        return self.incoming.popleft()
+        result = self.incoming.popleft()
+        if result is None:
+            raise WebSocketTimeoutException()
+        return result
 
     def envelope(self, body):
         packet = {"seq": self.seq, "to": {"ssid": self.ssid}, "data": body}
@@ -92,35 +102,55 @@ class ScriptedSocket:
             self.downlink(self.envelope({"type": "account", "name": "signed_on",
                                          "uid": "fixture-uid", "edata": {"alias": "Test", "private_field": "secret"}}))
             return
+        if method == "keep_alive":
+            assert system == "dispatcher" and params == {"ssid": self.ssid}
+            return
         assert params["uid"] == "fixture-uid"
-        if method == "sync_full_buddies":
+        if method == "sync_full_buddies" and self.buddies is not None:
+            reply = {"status": "success", "result": {"has_more": False, "buddies": self.buddies}}
+        elif method == "sync_full_buddies":
             more = params["cursor"] == "0"
             result = {"has_more": more, "next_cursor": "second" if more else "",
                       "buddies": [{"buid": "contact-a" if more else "contact-b", "alias": "Test Contact"}]}
             reply = {"status": "success", "result": result}
         elif method == "get_conversation":
             assert params["buid"] == "contact-a"
-            assert params["end_time"] == "900"
-            assert params["from_end"] is True and params["limit"] == 5
-            reply = [self.history_message or {"msg": "old message", "timestamp_nano_str": "800"}]
+            assert params["from_end"] is True
+            if self.history_pages is None:
+                assert params["end_time"] == "900" and params["limit"] == 5
+                reply = [self.history_message or {"msg": "old message", "timestamp_nano_str": "800"}]
+            else:
+                reply = self.history_pages[(params["end_time"], params["limit"])]
         elif method == "get_photo":
             assert system == "pixeldownload" and params["ssid"] == self.ssid
             data = {"photo-history": b"photo", "voice-event": b"voice"}[params["object_id"]]
             reply = {"base64": base64.b64encode(data).decode("ascii"), "total": len(data)}
+        elif method == "request_file_server" and self.file_server_response is not None:
+            assert system == "feproxy"
+            reply = {"res": self.file_server_response}
         elif method == "sync_chat_changes":
             reply = {"status": "success", "result": [
                 {"type": "update", "buid": "a", "change_ts": "1"},
                 {"type": "update", "buid": "b", "change_ts": "2"},
-                {"type": "update", "buid": "a", "change_ts": "3"},
+                {"type": "update", "buid": "a", "change_ts": "3",
+                 "last_message": {"msg": "Latest", "timestamp_nano_str": "200"}},
                 {"type": "update", "buid": "gone", "change_ts": "4"},
                 {"type": "delete", "buid": "gone", "change_ts": "5"},
             ]}
+        elif method == "get_group_members":
+            assert system == "pin" and params == {"gid": "group", "uid": "fixture-uid"}
+            reply = [
+                {"uid": "owner;suffix", "display": "Owner", "icon": "icon", "is_owner": True},
+                {"buid": "member", "display": "Member"},
+                {"uid": "deleted", "isDeleteAccount": True},
+                {"display": "Missing ID"},
+            ]
         elif method == "send_im":
             assert params["msg"] == "Salam"
             assert params["imdata"]["type"] == "im"
             if self.timeout_on_send:
                 return
-            reply = {"timestamp_nano_str": "901"}
+            reply = {} if params["buid"] in self.unconfirmed else {"timestamp_nano_str": "901"}
         elif method == "logout":
             reply = {"status": "success"}
         else:
@@ -136,7 +166,7 @@ def scripted(monkeypatch):
             assert url == "wss://sgp-webstream.imo.im/wss_webstream"
             assert origin == "https://web.imo.im"
             return sock
-        monkeypatch.setattr("imo._web_transport.create_connection", connect)
+        monkeypatch.setattr("imo.legacy._web_transport.create_connection", connect)
         return sock
     return install
 
@@ -228,3 +258,189 @@ def test_real_server_issues_qr_without_existing_session():
         assert challenge.ttl > 0
         assert challenge.payload
         assert not client.is_authenticated
+
+
+def test_connect_uses_callback_and_is_idempotent(scripted):
+    socket = scripted()
+    shown = []
+    with IMOClient() as client:
+        client.connect(show_qr=shown.append)
+        client.connect(show_qr=shown.append)
+        assert client.is_authenticated
+        assert [item.payload for item in shown] == ["fixture-qr"]
+        assert [method for _, method, _ in socket.calls] == ["request_qr_code", "cookie_login"]
+
+
+def test_default_connect_renders_terminal_qr(scripted, capsys):
+    pytest.importorskip("qrcode")
+    scripted()
+    with IMOClient() as client:
+        client.connect()
+        rendered = capsys.readouterr().err
+        assert "60s" in rendered
+        assert "fixture-qr" not in rendered
+
+
+def test_connect_closes_if_qr_display_is_interrupted(scripted):
+    socket = scripted()
+
+    def interrupt(challenge):
+        raise KeyboardInterrupt
+
+    client = IMOClient()
+    with pytest.raises(KeyboardInterrupt):
+        client.connect(show_qr=interrupt)
+    assert socket.closed and not client.is_authenticated
+
+
+def row(ts, msg, **fields):
+    return {"timestamp_nano_str": str(ts), "msg": msg, **fields}
+
+
+def test_iter_history_handles_inclusive_boundary_and_single_row_pages(scripted):
+    shared = row(800, "boundary")
+    second_at_same_time = row(800, "another author", author="other")
+    socket = scripted(history_pages={
+        ("900", 1): [shared],
+        ("800", 2): [shared, second_at_same_time],
+        ("800", 4): [shared, second_at_same_time, row(700, "older")],
+    })
+    with IMOClient() as client:
+        login(client)
+        chat = Chat.from_record({"buid": "contact-a"})
+        messages = client.iter_history(chat, before="900", page_size=1, max_messages=3)
+        assert all(method != "get_conversation" for _, method, _ in socket.calls)
+        records = list(messages)
+    assert [(message.buid, message.text) for message in records] == [
+        ("contact-a", "boundary"), ("contact-a", "another author"), ("contact-a", "older"),
+    ]
+    assert [p["end_time"] for _, method, p in socket.calls if method == "get_conversation"] == ["900", "800", "800"]
+
+
+def test_iter_history_rejects_non_advancing_cursor(scripted):
+    data = [row(800, str(index)) for index in range(100)]
+    scripted(history_pages={("900", 100): data, ("800", 100): data})
+    with IMOClient() as client:
+        login(client)
+        messages = client.iter_history("contact-a", before="900", page_size=100)
+        assert [next(messages).text for _ in data] == [str(index) for index in range(100)]
+        with pytest.raises(IMORequestError, match="could not advance"):
+            next(messages)
+
+
+def test_iter_history_rejects_rows_without_cursor(scripted):
+    scripted(history_pages={("900", 50): [{"msg": "unpageable"}]})
+    with IMOClient() as client:
+        login(client)
+        with pytest.raises(IMORequestError, match="pagination timestamp"):
+            list(client.iter_history("contact-a", before="900"))
+
+
+def test_typed_chats_roster_and_sending_to_contact(scripted):
+    scripted()
+    with IMOClient() as client:
+        login(client)
+        chat, _ = client.list_chats()
+        assert isinstance(chat, Chat) and not chat.is_group
+        assert chat.last_message.text == "Latest"
+        assert chat.last_message.buid == "a" and chat.changed_at_nano == "3"
+        with pytest.raises(ValueError, match="not a group"):
+            client.get_group_members(chat)
+        group = Chat.from_record({"buid": "group;"})
+        assert group.is_group and group.last_message is None
+        owner, member = client.get_group_members(group)
+        assert (owner.uid, owner.display, owner.is_owner) == ("owner", "Owner", True)
+        assert (member.uid, member.is_owner) == ("member", False)
+        contact = client.get_contacts()[0]
+        assert client.send_message(contact, "Salam").buid == contact.buid
+
+
+def test_run_dispatches_typed_message_and_downloads_attachment_after_idle(scripted, tmp_path):
+    socket = scripted()
+    calls = []
+    with IMOClient() as client:
+        login(client)
+        socket.incoming.append(None)
+        socket.downlink(socket.envelope({"type": "conv", "name": "recv_im", "edata": {
+            "buid": "contact-a", "msg": "Salam!", "timestamp_nano_str": "900", "author": "a",
+            "imdata": '{"type":"audio_uploaded","msg_id":"42","objects":[{"object_id":"imo/voice-event"}]}',
+        }}))
+
+        @client.on_message
+        def handler(message):
+            assert isinstance(message, WebMessage)
+            assert (message.text, message.message_id, message.author) == ("Salam!", "42", "a")
+            assert message.attachments[0].kind == "audio"
+            (path,) = client.download_attachments(message, tmp_path)
+            calls.append(path.read_bytes())
+            client.stop()
+            with pytest.raises(RuntimeError, match="already running"):
+                client.run()
+
+        client.on_message(handler)
+        client.run()
+        assert client.is_authenticated and calls == [b"voice"]
+        client.remove_message_handler(handler)
+        with pytest.raises(ValueError, match="Register"):
+            client.run()
+
+
+def test_run_exposes_handler_errors_and_can_be_restarted(scripted):
+    socket = scripted()
+    with IMOClient() as client:
+        login(client)
+
+        @client.on_message
+        def failing(message):
+            raise IMOTimeoutError("handler operation failed")
+
+        socket.downlink(socket.envelope({"type": "conv", "name": "recv_im", "edata": {"msg": "first"}}))
+        with pytest.raises(IMOTimeoutError, match="handler operation"):
+            client.run()
+        client.remove_message_handler(failing)
+        client.on_message(lambda _: client.stop())
+        socket.downlink(socket.envelope({"type": "conv", "name": "recv_im", "edata": {"msg": "second"}}))
+        client.run()
+        assert client.is_authenticated
+
+
+def test_event_queue_discards_unsubscribed_events_but_reports_overflow(scripted, monkeypatch):
+    socket = scripted()
+    with IMOClient() as client:
+        login(client)
+        monkeypatch.setattr("imo.legacy._web_transport._MAX_EVENTS", 2)
+        for _ in range(3):
+            socket.downlink(socket.envelope({"type": "unrelated", "name": "ignored"}))
+        socket.downlink(socket.envelope({"type": "conv", "name": "recv_im", "edata": {"msg": "ok"}}))
+        assert client.receive_message()["msg"] == "ok"
+        for index in range(3):
+            socket.downlink(socket.envelope({"type": "conv", "name": "recv_im", "edata": {"msg": str(index)}}))
+        with pytest.raises(IMOTransportError, match="event buffer exceeded"):
+            client.get_contacts()
+        assert not client.is_authenticated
+
+
+def test_keepalive_preserves_pending_command(scripted, monkeypatch):
+    socket = scripted()
+    with IMOClient(timeout=400) as client:
+        login(client)
+        now = 0.0
+        original_recv = socket.recv
+
+        def recv():
+            nonlocal now
+            try:
+                return original_recv()
+            except WebSocketTimeoutException:
+                now += 180
+                raise
+
+        monkeypatch.setattr(socket, "recv", recv)
+        monkeypatch.setattr("imo.legacy._web_transport.time", SimpleNamespace(
+            time=time.time, time_ns=time.time_ns, monotonic=lambda: now,
+        ))
+        socket.incoming.append(None)
+        assert [contact.buid for contact in client.get_contacts()] == ["contact-a", "contact-b"]
+        assert [method for _, method, _ in socket.calls][-3:] == [
+            "sync_full_buddies", "keep_alive", "sync_full_buddies",
+        ]

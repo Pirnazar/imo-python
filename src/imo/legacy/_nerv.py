@@ -95,10 +95,10 @@ class _Reader:
                 self.skip_rows((2,))
 
 
-def _server_request(request_id, uid64, country):
+def _server_request(request_id, uid64, country, *, request_type=2):
     payload = (
         pack("<III", request_id, 0, 0) + _string(country) +
-        pack("<IQIQ", 2, 0, 62, uid64) +
+        pack("<IQIQ", request_type, 0, 62, uid64) +
         pack("<IHIHH", 0, 0, 0, 0, 0) + _string(country) +
         pack("<BIIBI", 0, 1, 1010000, 100, 1) +
         _string("taskfrom") + _string("web")
@@ -259,12 +259,12 @@ def _read_download(ws, seq, uid64, token, timeout, max_bytes):
         del pending[:consumed]
 
 
-def nerv_chunks(request, uid, country, reference, timeout, max_bytes):
+def _open_file_server(request, uid, country, timeout, *, request_type):
     uid64 = account_hash(uid)
     request_id = next(_REQUEST_IDS) & 0xFFFFFFFF
-    response = request("feproxy", "request_file_server", {"payload": _server_request(request_id, uid64, country)})
+    payload = _server_request(request_id, uid64, country, request_type=request_type)
+    response = request("feproxy", "request_file_server", {"payload": payload})
     address, tokens, token = _server_response(response, request_id, uid64)
-    ws = None
     for websocket_token in tokens[:2]:
         try:
             candidate = create_connection(address + "?token=" + websocket_token, origin=_ORIGIN,
@@ -272,11 +272,13 @@ def nerv_chunks(request, uid, country, reference, timeout, max_bytes):
         except (WebSocketException, OSError):
             continue
         if candidate.getstatus() == 101:
-            ws = candidate
-            break
+            return candidate, uid64, token
         candidate.shutdown()
-    if ws is None:
-        raise IMODownloadError("Unable to connect to the Nerv file server")
+    raise IMODownloadError("Unable to connect to the Nerv file server")
+
+
+def nerv_chunks(request, uid, country, reference, timeout, max_bytes):
+    ws, uid64, token = _open_file_server(request, uid, country, timeout, request_type=2)
     try:
         seq = int(time.time()) & 0xFFFFFFFF
         ws.send_binary(_start_request(seq, uid64, country, token, reference))

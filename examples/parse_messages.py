@@ -5,7 +5,7 @@ It does not connect to imo, read your session, or send anything.
 
     python examples/parse_messages.py
 """
-from imo import Head, parse_imdata
+from imo.models import Head, parse_imdata
 
 # Example payloads shaped like docs/imdata_format.md (not real account data).
 SAMPLES = [
